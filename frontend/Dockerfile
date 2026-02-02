@@ -1,28 +1,11 @@
-# Multi-stage build for Angular
-FROM node:20-alpine as build
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm ci
-
-# Copy application code
-COPY . .
-
-# Build Angular app for production
-RUN npm run build --prod
-
 # Production stage with nginx
 FROM nginx:alpine
 
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Copy built app from build stage
-COPY --from=build /app/dist/it-inventory-frontend /usr/share/nginx/html
+# Copy frontend files
+COPY src/ /usr/share/nginx/html/
 
 # Expose port
 EXPOSE 80
