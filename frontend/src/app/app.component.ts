@@ -6,7 +6,7 @@ import { AuthService } from './core/services/auth.service';
   template: `
     <div class="app-container">
       <app-navbar *ngIf="authService.isAuthenticated()"></app-navbar>
-      <main class="main-content">
+      <main class="main-content" [class.no-nav]="!authService.isAuthenticated()">
         <router-outlet></router-outlet>
       </main>
     </div>
@@ -18,6 +18,9 @@ import { AuthService } from './core/services/auth.service';
     }
     .main-content {
       padding-top: 60px;
+    }
+    .main-content.no-nav {
+      padding-top: 0;
     }
   `]
 })
