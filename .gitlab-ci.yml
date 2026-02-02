@@ -1,0 +1,161 @@
+stages:
+  - lint
+  - test
+  - build
+  - deploy
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  BACKEND_IMAGE: $CI_REGISTRY_IMAGE/backend
+  FRONTEND_IMAGE: $CI_REGISTRY_IMAGE/frontend
+
+# Backend lint stage
+backend-lint:
+  stage: lint
+  image: python:3.11-slim
+  before_script:
+    - cd backend
+    - pip install flake8 black
+  script:
+    - flake8 app --max-line-length=120 --exclude=__pycache__
+    - black --check app
+  only:
+    changes:
+      - backend/**/*
+
+# Frontend lint stage
+frontend-lint:
+  stage: lint
+  image: node:20-alpine
+  before_script:
+    - cd frontend
+    - npm ci
+  script:
+    - npm run lint
+  only:
+    changes:
+      - frontend/**/*
+
+# Backend tests
+backend-test:
+  stage: test
+  image: python:3.11-slim
+  services:
+    - postgres:15-alpine
+  variables:
+    POSTGRES_DB: test_db
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    POSTGRES_SERVER: postgres
+    POSTGRES_PORT: 5432
+  before_script:
+    - cd backend
+    - pip install -r requirements.txt
+  script:
+    - pytest tests/ -v
+  only:
+    changes:
+      - backend/**/*
+
+# Frontend tests
+frontend-test:
+  stage: test
+  image: node:20-alpine
+  before_script:
+    - cd frontend
+    - npm ci
+  script:
+    - npm run test -- --watch=false --browsers=ChromeHeadless
+  only:
+    changes:
+      - frontend/**/*
+
+# Build backend Docker image
+build-backend:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $BACKEND_IMAGE:$CI_COMMIT_SHA -t $BACKEND_IMAGE:latest backend/
+    - docker push $BACKEND_IMAGE:$CI_COMMIT_SHA
+    - docker push $BACKEND_IMAGE:latest
+  only:
+    - main
+    - develop
+
+# Build frontend Docker image
+build-frontend:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $FRONTEND_IMAGE:$CI_COMMIT_SHA -t $FRONTEND_IMAGE:latest frontend/
+    - docker push $FRONTEND_IMAGE:$CI_COMMIT_SHA
+    - docker push $FRONTEND_IMAGE:latest
+  only:
+    - main
+    - develop
+
+# Deploy to Kubernetes
+deploy-k8s:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  before_script:
+    - kubectl config set-cluster k8s --server="$KUBE_URL" --insecure-skip-tls-verify=true
+    - kubectl config set-credentials admin --token="$KUBE_TOKEN"
+    - kubectl config set-context default --cluster=k8s --user=admin
+    - kubectl config use-context default
+  script:
+    # Create namespace if not exists
+    - kubectl apply -f k8s/namespace.yaml
+    
+    # Apply ConfigMaps and Secrets (ensure secrets are created manually first)
+    - kubectl apply -f k8s/backend/configmap.yaml
+    
+    # Deploy PostgreSQL
+    - kubectl apply -f k8s/postgres-statefulset.yaml
+    
+    # Deploy backend
+    - kubectl apply -f k8s/backend/deployment.yaml
+    - kubectl apply -f k8s/backend/service.yaml
+    
+    # Deploy frontend
+    - kubectl apply -f k8s/frontend/deployment.yaml
+    - kubectl apply -f k8s/frontend/service.yaml
+    
+    # Update images to latest version
+    - kubectl set image deployment/backend-deployment backend=$BACKEND_IMAGE:$CI_COMMIT_SHA -n it-inventory
+    - kubectl set image deployment/frontend-deployment frontend=$FRONTEND_IMAGE:$CI_COMMIT_SHA -n it-inventory
+    
+    # Wait for rollout
+    - kubectl rollout status deployment/backend-deployment -n it-inventory
+    - kubectl rollout status deployment/frontend-deployment -n it-inventory
+  environment:
+    name: production
+    url: http://your-domain.com
+  only:
+    - main
+  when: manual
+
+# Rollback deployment
+rollback:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  before_script:
+    - kubectl config set-cluster k8s --server="$KUBE_URL" --insecure-skip-tls-verify=true
+    - kubectl config set-credentials admin --token="$KUBE_TOKEN"
+    - kubectl config set-context default --cluster=k8s --user=admin
+    - kubectl config use-context default
+  script:
+    - kubectl rollout undo deployment/backend-deployment -n it-inventory
+    - kubectl rollout undo deployment/frontend-deployment -n it-inventory
+  when: manual
+  only:
+    - main

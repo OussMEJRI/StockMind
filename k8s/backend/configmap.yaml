@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: it-inventory
+data:
+  POSTGRES_SERVER: "postgres-service"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "inventory_db"
+  POSTGRES_USER: "postgres"
+  API_V1_STR: "/api/v1"
