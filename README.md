@@ -174,6 +174,8 @@ L'application sera disponible sur: http://localhost:4200
 
 ### Installation avec Docker Compose
 
+**Note**: Si vous utilisez WSL2, assurez-vous que Docker Desktop est installé et que l'intégration WSL2 est activée dans les paramètres Docker Desktop.
+
 ```bash
 # Lancer tous les services
 docker-compose up -d
