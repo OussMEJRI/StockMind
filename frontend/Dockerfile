@@ -21,8 +21,9 @@ FROM nginx:alpine
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Copy built app from build stage
-COPY --from=build /app/dist/it-inventory-frontend/browser /usr/share/nginx/html/
+# Copy built app from build stage (CORRECT PATH)
+COPY --from=build /app/dist/it-inventory-frontend /usr/share/nginx/html/
+
 
 # Expose port
 EXPOSE 80
