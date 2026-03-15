@@ -1,89 +1,99 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from app.db.session import get_db
-from app.models import Employee, User, UserRole
-from app.schemas.employee import EmployeeCreate, EmployeeUpdate, EmployeeResponse
-from app.core.deps import get_current_user, require_roles
+
+from app.core import deps
+from app.crud import employee as employee_crud
+from app.schemas.employee import Employee, EmployeeCreate, EmployeeUpdate
 
 router = APIRouter()
 
 
-@router.get("/", response_model=List[EmployeeResponse])
-def list_employees(
+@router.get("", response_model=List[Employee])
+def get_employees(
+    db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
 ):
-    """List all employees."""
-    employees = db.query(Employee).offset(skip).limit(limit).all()
+    """
+    Récupérer la liste des employés
+    """
+    employees = employee_crud.get_multi(db, skip=skip, limit=limit)
     return employees
 
 
-@router.get("/{employee_id}", response_model=EmployeeResponse)
+@router.post("", response_model=Employee)
+def create_employee(
+    *,
+    db: Session = Depends(deps.get_db),
+    employee_in: EmployeeCreate,
+):
+    """
+    Créer un nouvel employé
+    """
+    # Vérifier si l'email existe déjà
+    existing_employee = employee_crud.get_by_email(db, email=employee_in.email)
+    if existing_employee:
+        raise HTTPException(
+            status_code=400,
+            detail="Un employé avec cet email existe déjà"
+        )
+    
+    employee = employee_crud.create(db, employee_in)
+    return employee
+
+
+@router.get("/{employee_id}", response_model=Employee)
 def get_employee(
     employee_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(deps.get_db),
 ):
-    """Get employee by ID."""
-    employee = db.query(Employee).filter(Employee.id == employee_id).first()
+    """
+    Récupérer un employé par son ID
+    """
+    employee = employee_crud.get(db, employee_id)
     if not employee:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee not found")
+        raise HTTPException(status_code=404, detail="Employé non trouvé")
     return employee
 
 
-@router.post("/", response_model=EmployeeResponse, status_code=status.HTTP_201_CREATED)
-def create_employee(
-    employee_in: EmployeeCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.GESTIONNAIRE]))
-):
-    """Create new employee."""
-    existing = db.query(Employee).filter(Employee.email == employee_in.email).first()
-    if existing:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already exists")
-    
-    db_employee = Employee(**employee_in.model_dump())
-    db.add(db_employee)
-    db.commit()
-    db.refresh(db_employee)
-    return db_employee
-
-
-@router.put("/{employee_id}", response_model=EmployeeResponse)
+@router.put("/{employee_id}", response_model=Employee)
 def update_employee(
+    *,
+    db: Session = Depends(deps.get_db),
     employee_id: int,
     employee_in: EmployeeUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.GESTIONNAIRE]))
 ):
-    """Update employee."""
-    employee = db.query(Employee).filter(Employee.id == employee_id).first()
+    """
+    Mettre à jour un employé
+    """
+    employee = employee_crud.get(db, employee_id)
     if not employee:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee not found")
+        raise HTTPException(status_code=404, detail="Employé non trouvé")
     
-    update_data = employee_in.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(employee, field, value)
+    # Vérifier si l'email existe déjà (si modifié)
+    if employee_in.email and employee_in.email != employee.email:
+        existing_employee = employee_crud.get_by_email(db, email=employee_in.email)
+        if existing_employee:
+            raise HTTPException(
+                status_code=400,
+                detail="Un employé avec cet email existe déjà"
+            )
     
-    db.commit()
-    db.refresh(employee)
+    employee = employee_crud.update(db, employee, employee_in)
     return employee
 
 
-@router.delete("/{employee_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{employee_id}")
 def delete_employee(
     employee_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.ADMIN]))
+    db: Session = Depends(deps.get_db),
 ):
-    """Delete employee."""
-    employee = db.query(Employee).filter(Employee.id == employee_id).first()
-    if not employee:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee not found")
+    """
+    Supprimer un employé
+    """
+    success = employee_crud.delete(db, employee_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Employé non trouvé")
     
-    db.delete(employee)
-    db.commit()
-    return None
+    return {"message": "Employé supprimé avec succès"}
