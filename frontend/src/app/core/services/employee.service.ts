@@ -32,7 +32,6 @@ export class EmployeeService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  // Nouvelles méthodes pour l'import Excel
   importEmployees(file: File): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
