@@ -30,8 +30,6 @@ import { NavbarComponent } from './shared/components/navbar/navbar.component';
     DashboardComponent,
     EquipmentListComponent,
     EquipmentFormComponent,
-    EmployeeListComponent,
-    EmployeeFormComponent,
     LocationListComponent,
     ChatbotComponent,
     NavbarComponent
@@ -43,7 +41,9 @@ import { NavbarComponent } from './shared/components/navbar/navbar.component';
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-    AppRoutingModule
+    AppRoutingModule,
+    EmployeeListComponent,
+    EmployeeFormComponent
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

@@ -1,5 +1,6 @@
 # IT Inventory Manager
 
+
 Application web de gestion intelligente d'inventaire informatique avec chatbot intégré.
 
 ## 📋 Table des matières
