@@ -428,3 +428,4 @@ Pour toute question ou problème:
 ---
 
 **Note**: Cette application est prête pour la production avec quelques ajustements de configuration nécessaires (voir section Sécurité).
+
