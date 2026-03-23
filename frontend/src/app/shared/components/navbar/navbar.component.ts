@@ -29,6 +29,10 @@ import { AuthService } from '../../../core/services/auth.service';
           </a>
         </div>
         
+        <div class="navbar-search">
+          <app-global-search></app-global-search>
+        </div>
+        
         <div class="navbar-user">
           <span class="user-name" *ngIf="authService.currentUserValue">
             {{ authService.currentUserValue.first_name }} {{ authService.currentUserValue.last_name }}
@@ -58,6 +62,7 @@ import { AuthService } from '../../../core/services/auth.service';
       display: flex;
       align-items: center;
       height: 60px;
+      gap: 1rem;
     }
     
     .navbar-brand {
@@ -66,6 +71,7 @@ import { AuthService } from '../../../core/services/auth.service';
       color: #667eea;
       text-decoration: none;
       margin-right: 2rem;
+      white-space: nowrap;
     }
     
     .navbar-menu {
@@ -81,6 +87,7 @@ import { AuthService } from '../../../core/services/auth.service';
       border-radius: 8px;
       transition: all 0.3s;
       font-size: 0.9rem;
+      white-space: nowrap;
     }
     
     .navbar-menu a:hover {
@@ -93,6 +100,11 @@ import { AuthService } from '../../../core/services/auth.service';
       color: white;
     }
     
+    .navbar-search {
+      margin-left: auto;
+      margin-right: 1rem;
+    }
+    
     .navbar-user {
       display: flex;
       align-items: center;
@@ -102,11 +114,15 @@ import { AuthService } from '../../../core/services/auth.service';
     .user-name {
       color: #666;
       font-size: 0.9rem;
+      white-space: nowrap;
     }
     
     @media (max-width: 992px) {
       .navbar-menu {
         display: none;
+      }
+      .navbar-search {
+        margin-left: 1rem;
       }
     }
   `]

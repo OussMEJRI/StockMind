@@ -58,7 +58,6 @@
         "serve": {
   "builder": "@angular-devkit/build-angular:dev-server",
   "options": {
-    "proxyConfig": "proxy.conf.json"
   },
   "configurations": {
     "production": {
@@ -72,7 +71,6 @@
 },
           "defaultConfiguration": "development",
           "options": {
-            "proxyConfig": "proxy.conf.json"
           }
         },
         "test": {
@@ -89,6 +87,9 @@
           }
         }
       }
+    },
+    "cli": {
+      "analytics": "f08ce00a-533d-4412-890d-07ad7f41ca1d"
     }
   },
   "cli": {

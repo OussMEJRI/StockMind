@@ -12,6 +12,9 @@ import { AppComponent } from './app.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { ErrorInterceptor } from './core/interceptors/error.interceptor';
 
+// Modules
+import { SharedModule } from './shared/shared.module';
+
 // Components
 import { LoginComponent } from './features/auth/login/login.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
@@ -42,6 +45,7 @@ import { NavbarComponent } from './shared/components/navbar/navbar.component';
     FormsModule,
     ReactiveFormsModule,
     AppRoutingModule,
+    SharedModule,
     EmployeeListComponent,
     EmployeeFormComponent
   ],

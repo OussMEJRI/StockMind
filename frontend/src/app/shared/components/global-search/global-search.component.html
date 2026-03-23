@@ -1,0 +1,94 @@
+<div class="search-container">
+  <div class="search-input-wrapper">
+    <mat-icon class="search-icon">search</mat-icon>
+    <input
+      type="text"
+      [formControl]="searchControl"
+      placeholder="Rechercher un employé ou un équipement..."
+      class="search-input"
+      (focus)="showResults = searchResults.length > 0"
+    />
+    <button
+      *ngIf="searchControl.value"
+      mat-icon-button
+      (click)="clearSearch()"
+      class="clear-button"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+    <mat-spinner
+      *ngIf="isSearching"
+      diameter="20"
+      class="search-spinner"
+    ></mat-spinner>
+  </div>
+
+  <div *ngIf="showResults" class="search-results">
+    <div class="results-header">
+      <span>{{ searchResults.length }} résultat(s) trouvé(s)</span>
+      <button mat-icon-button (click)="closeResults()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="results-list">
+      <div
+        *ngFor="let result of searchResults"
+        class="result-item"
+      >
+        <!-- Résultat Employé -->
+        <div *ngIf="result.type === 'employee' && result.employee" class="employee-card">
+          <div class="employee-header">
+            <mat-icon>person</mat-icon>
+            <div class="employee-info">
+              <h3>{{ result.employee.first_name }} {{ result.employee.last_name }}</h3>
+              <p class="email">{{ result.employee.email }}</p>
+            </div>
+          </div>
+          <div class="equipment-list" *ngIf="result.employee.equipment && result.employee.equipment.length > 0">
+            <h4>Équipements assignés ({{ result.employee.equipment.length }}) :</h4>
+            <div class="equipment-chips">
+              <div class="equipment-chip" *ngFor="let eq of result.employee.equipment">
+                <mat-icon>devices</mat-icon>
+                <span>{{ eq.name }} - {{ eq.type }}</span>
+                <span class="serial">{{ eq.serial_number }}</span>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!result.employee.equipment || result.employee.equipment.length === 0" class="no-equipment">
+            <mat-icon>info</mat-icon>
+            Aucun équipement assigné
+          </div>
+        </div>
+
+        <!-- Résultat Équipement -->
+        <div *ngIf="result.type === 'equipment' && result.equipment" class="equipment-card">
+          <div class="equipment-header">
+            <mat-icon>devices</mat-icon>
+            <div class="equipment-info">
+              <h3>{{ result.equipment.name }}</h3>
+              <p class="type">{{ result.equipment.type }} - {{ result.equipment.serial_number }}</p>
+            </div>
+          </div>
+          <div class="assigned-to" *ngIf="result.equipment.assigned_to">
+            <h4>Assigné à :</h4>
+            <div class="employee-chip">
+              <mat-icon>person</mat-icon>
+              <span>
+                {{ result.equipment.assigned_to.first_name }}
+                {{ result.equipment.assigned_to.last_name }}
+              </span>
+              <span class="email">{{ result.equipment.assigned_to.email }}</span>
+            </div>
+          </div>
+          <div *ngIf="!result.equipment.assigned_to" class="not-assigned">
+            <mat-icon>info</mat-icon>
+            Non assigné
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showResults" class="search-overlay" (click)="closeResults()"></div>

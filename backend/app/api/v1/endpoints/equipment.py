@@ -10,6 +10,7 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[EquipmentResponse])
+@router.get("", response_model=List[EquipmentResponse])
 def list_equipment(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -73,6 +74,7 @@ def get_equipment(
 
 
 @router.post("/", response_model=EquipmentResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=EquipmentResponse, status_code=status.HTTP_201_CREATED)
 def create_equipment(
     equipment_in: EquipmentCreate,
     db: Session = Depends(get_db),

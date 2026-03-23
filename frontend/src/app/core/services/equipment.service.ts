@@ -29,7 +29,7 @@ export class EquipmentService {
   }
 
   getEquipmentById(id: number): Observable<Equipment> {
-    return this.http.get<Equipment>(`${this.apiUrl}/${id}`);
+    return this.http.get<Equipment>(`${this.apiUrl}${id}`);
   }
 
   createEquipment(equipment: Equipment): Observable<Equipment> {
@@ -37,15 +37,15 @@ export class EquipmentService {
   }
 
   updateEquipment(id: number, equipment: Partial<Equipment>): Observable<Equipment> {
-    return this.http.put<Equipment>(`${this.apiUrl}/${id}`, equipment);
+    return this.http.put<Equipment>(`${this.apiUrl}${id}`, equipment);
   }
 
   deleteEquipment(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}${id}`);
   }
 
   assignEquipment(equipmentId: number, employeeId: number, notes?: string): Observable<Equipment> {
-    return this.http.post<Equipment>(`${this.apiUrl}/assign`, {
+    return this.http.post<Equipment>(`${environment.apiUrl}/equipmentassign`, {
       equipment_id: equipmentId,
       employee_id: employeeId,
       notes
