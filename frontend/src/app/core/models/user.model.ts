@@ -4,6 +4,26 @@ export enum UserRole {
   COLLABORATEUR = 'collaborateur'
 }
 
+export enum ContractType {
+  CDI = 'CDI',
+  CDD = 'CDD',
+  STAGIAIRE = 'STAGIAIRE',
+  EXTERNE = 'EXTERNE'
+}
+
+export enum Department {
+  BLI = 'BLI',
+  CCI = 'CCI',
+  DTSI = 'DTSI',
+  OBDS = 'OBDS',
+  OBS = 'OBS',
+  OIT = 'OIT',
+  OW = 'OW',
+  SAH = 'SAH',
+  SN3 = 'SN3',
+  SUPPORT = 'SUPPORT'
+}
+
 export interface User {
   id: number;
   email: string;
@@ -25,10 +45,11 @@ export interface TokenResponse {
 
 export interface Employee {
   id?: number;
-  first_name: string;
-  last_name: string;
+  name: string;
   email: string;
-  department: string;
+  cuid?: string;
+  contract_type?: ContractType | string;
+  department?: Department | string;
 }
 
 export interface Location {

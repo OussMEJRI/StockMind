@@ -1,5 +1,6 @@
 # IT Inventory Manager
 
+
 Application web de gestion intelligente d'inventaire informatique avec chatbot intégré.
 
 ## 📋 Table des matières
@@ -258,22 +259,15 @@ Le pipeline GitLab CI/CD est configuré avec les stages suivants:
 # Depuis le conteneur backend
 docker exec -it inventory-backend python
 
->>> from app.db.session import SessionLocal
->>> from app.models.user import User, UserRole
->>> from app.core.security import get_password_hash
->>> 
->>> db = SessionLocal()
->>> admin = User(
-...     email="admin@example.com",
-...     hashed_password=get_password_hash("admin123"),
-...     first_name="Admin",
-...     last_name="User",
-...     role=UserRole.ADMIN,
-...     is_active=True
-... )
->>> db.add(admin)
->>> db.commit()
->>> exit()
+from app.db.session import SessionLocal
+from app.models.user import User, UserRole
+from app.core.security import get_password_hash
+ 
+db = SessionLocal()
+admin = User(email="admin@example.com",hashed_password=get_password_hash("admin123"),first_name="Admin",last_name="User",role=UserRole.ADMIN,is_active=True)
+db.add(admin)
+db.commit()
+exit()
 ```
 
 ### Utiliser l'API

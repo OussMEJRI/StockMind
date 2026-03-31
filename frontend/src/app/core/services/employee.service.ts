@@ -31,4 +31,17 @@ export class EmployeeService {
   deleteEmployee(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  importEmployees(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    return this.http.post(`${this.apiUrl}/import`, formData);
+  }
+
+  downloadTemplate(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/template/download`, {
+      responseType: 'blob'
+    });
+  }
 }
