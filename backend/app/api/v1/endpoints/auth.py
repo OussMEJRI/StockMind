@@ -3,7 +3,8 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-
+from app.core.deps import get_current_active_user
+from app.models.user import User
 from app.core import security
 from app.core.config import settings
 from app.core.deps import get_db
@@ -11,6 +12,11 @@ from app.crud import user as user_crud
 from app.schemas.token import Token
 
 router = APIRouter()
+
+@router.get("/me")
+def read_current_user(current_user: User = Depends(get_current_active_user)):
+    return current_user
+
 
 @router.post("/login", response_model=Token)
 def login(

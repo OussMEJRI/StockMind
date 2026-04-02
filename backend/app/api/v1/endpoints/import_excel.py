@@ -50,5 +50,5 @@ def import_equipment(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erreur lors de l'import : {str(e)}"
         )
-        from .import_excel import router as import_excel_router
-router.include_router(import_excel_router, prefix="/import", tags=["Import"])
+#        from .import_excel import router as import_excel_router
+#router.include_router(import_excel_router, prefix="/import", tags=["Import"])
