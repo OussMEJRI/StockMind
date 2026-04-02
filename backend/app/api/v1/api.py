@@ -1,5 +1,13 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import auth, employees, health, equipment, locations, chatbot, import_excel
+from app.api.v1.endpoints import (
+    auth,
+    employees,
+    health,
+    equipment,
+    locations,
+    chatbot,
+    import_excel,
+)
 
 api_router = APIRouter()
 
