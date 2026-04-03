@@ -9,7 +9,7 @@ from app.schemas.employee import Employee, EmployeeCreate, EmployeeUpdate
 router = APIRouter()
 
 
-@router.get("", response_model=List[Employee])
+@router.get("/", response_model=List[Employee])
 def get_employees(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
@@ -22,7 +22,7 @@ def get_employees(
     return employees
 
 
-@router.post("", response_model=Employee)
+@router.post("/", response_model=Employee)
 def create_employee(
     *,
     db: Session = Depends(deps.get_db),
