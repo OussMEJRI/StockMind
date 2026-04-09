@@ -9,26 +9,32 @@ import { EquipmentFormComponent } from './features/equipment/equipment-form/equi
 import { EmployeeListComponent } from './features/employees/employee-list/employee-list.component';
 import { EmployeeFormComponent } from './features/employees/employee-form/employee-form.component';
 import { LocationListComponent } from './features/locations/location-list/location-list.component';
+import { LocationFormComponent } from './features/locations/location-form/location-form.component';
 import { ChatbotComponent } from './features/chatbot/chatbot.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
-  { 
-    path: '', 
-    canActivate: [AuthGuard],
-    children: [
-      { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: DashboardComponent },
-      { path: 'equipment', component: EquipmentListComponent },
-      { path: 'equipment/new', component: EquipmentFormComponent },
-      { path: 'equipment/edit/:id', component: EquipmentFormComponent },
-      { path: 'employees', component: EmployeeListComponent },
-      { path: 'employees/new', component: EmployeeFormComponent },
-      { path: 'employees/edit/:id', component: EmployeeFormComponent },
-      { path: 'locations', component: LocationListComponent },
-      { path: 'chatbot', component: ChatbotComponent }
-    ]
-  },
+  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+  { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
+  
+  // Equipment routes
+  { path: 'equipment', component: EquipmentListComponent, canActivate: [AuthGuard] },
+  { path: 'equipment/new', component: EquipmentFormComponent, canActivate: [AuthGuard] },
+  { path: 'equipment/edit/:id', component: EquipmentFormComponent, canActivate: [AuthGuard] },
+  
+  // Employee routes
+  { path: 'employees', component: EmployeeListComponent, canActivate: [AuthGuard] },
+  { path: 'employees/new', component: EmployeeFormComponent, canActivate: [AuthGuard] },
+  { path: 'employees/edit/:id', component: EmployeeFormComponent, canActivate: [AuthGuard] },
+  
+  // Location routes
+  { path: 'locations', component: LocationListComponent, canActivate: [AuthGuard] },
+  { path: 'locations/new', component: LocationFormComponent, canActivate: [AuthGuard] },
+  { path: 'locations/edit/:id', component: LocationFormComponent, canActivate: [AuthGuard] },
+  
+  // Chatbot route
+  { path: 'chatbot', component: ChatbotComponent, canActivate: [AuthGuard] },
+  
   { path: '**', redirectTo: '/dashboard' }
 ];
 

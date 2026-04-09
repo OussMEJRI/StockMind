@@ -1,0 +1,55 @@
+<div class="container">
+  <div class="header">
+    <h1>Gestion des Localisations</h1>
+    <button class="btn btn-primary" (click)="addLocation()">
+      ➕ Nouvelle Localisation
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    Chargement des localisations...
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error" class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Position exacte</th>
+          <th>Adresse</th>
+          <th>Ville</th>
+          <th>Pays</th>
+          <th>Date de création</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let location of locations">
+          <td>{{ location.id }}</td>
+          <td><strong>{{ location.name }}</strong></td>
+          <td>{{ location.address || '-' }}</td>
+          <td>{{ location.city || '-' }}</td>
+          <td>{{ location.country || '-' }}</td>
+          <td>{{ location.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td class="actions">
+            <button class="btn btn-sm btn-info" (click)="editLocation(location.id!)">
+              ✏️ Modifier
+            </button>
+            <button class="btn btn-sm btn-danger" (click)="deleteLocation(location.id!, location.name)">
+              🗑️ Supprimer
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="locations.length === 0">
+          <td colspan="7" class="no-data">
+            Aucune localisation trouvée. Cliquez sur "Nouvelle Localisation" pour en ajouter une.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

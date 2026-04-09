@@ -1,282 +1,123 @@
-import { Component } from '@angular/core';
-import { ChatbotService } from '../../core/services/chatbot.service';
-
-interface Message {
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
-}
+import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { ChatbotService, ChatMessage } from '../../core/services/chatbot.service';
 
 @Component({
   selector: 'app-chatbot',
-  template: `
-    <div class="chatbot-container">
-      <div class="page-header">
-        <h1>🤖 Assistant Intelligent</h1>
-      </div>
-      
-      <div class="chat-card card">
-        <div class="chat-messages" #chatMessages>
-          <div class="welcome-message" *ngIf="messages.length === 0">
-            <div class="welcome-icon">🤖</div>
-            <h3>Bienvenue !</h3>
-            <p>Je suis votre assistant IT. Posez-moi des questions sur votre inventaire.</p>
-            <div class="suggestions">
-              <button class="suggestion" (click)="askQuestion('Avons-nous des laptops disponibles ?')">
-                💻 Laptops disponibles ?
-              </button>
-              <button class="suggestion" (click)="askQuestion('Combien d\\'équipements avons-nous ?')">
-                📊 Total équipements
-              </button>
-              <button class="suggestion" (click)="askQuestion('Liste des employés')">
-                👥 Liste employés
-              </button>
-            </div>
-          </div>
-          
-          <div *ngFor="let msg of messages" class="message" [ngClass]="{'user': msg.isUser, 'bot': !msg.isUser}">
-            <div class="message-avatar">
-              {{ msg.isUser ? '👤' : '🤖' }}
-            </div>
-            <div class="message-content">
-              <p>{{ msg.text }}</p>
-              <span class="message-time">{{ msg.timestamp | date:'HH:mm' }}</span>
-            </div>
-          </div>
-          
-          <div class="message bot" *ngIf="loading">
-            <div class="message-avatar">🤖</div>
-            <div class="message-content">
-              <div class="typing-indicator">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="chat-input">
-          <input 
-            type="text" 
-            class="form-control"
-            [(ngModel)]="question"
-            (keyup.enter)="sendMessage()"
-            placeholder="Posez votre question..."
-            [disabled]="loading">
-          <button class="btn btn-primary" (click)="sendMessage()" [disabled]="!question.trim() || loading">
-            Envoyer
-          </button>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .chatbot-container {
-      padding: 2rem;
-      max-width: 900px;
-      margin: 0 auto;
-      height: calc(100vh - 60px);
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .chat-card {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    
-    .chat-messages {
-      flex: 1;
-      padding: 1.5rem;
-      overflow-y: auto;
-    }
-    
-    .welcome-message {
-      text-align: center;
-      padding: 2rem;
-    }
-    
-    .welcome-icon {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-    }
-    
-    .welcome-message h3 {
-      color: #667eea;
-      margin-bottom: 0.5rem;
-    }
-    
-    .welcome-message p {
-      color: #666;
-      margin-bottom: 1.5rem;
-    }
-    
-    .suggestions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      justify-content: center;
-    }
-    
-    .suggestion {
-      background: #f0f2ff;
-      border: 1px solid #667eea;
-      color: #667eea;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: all 0.3s;
-      font-size: 0.9rem;
-    }
-    
-    .suggestion:hover {
-      background: #667eea;
-      color: white;
-    }
-    
-    .message {
-      display: flex;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-      max-width: 80%;
-    }
-    
-    .message.user {
-      margin-left: auto;
-      flex-direction: row-reverse;
-    }
-    
-    .message-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: #f0f2ff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-      flex-shrink: 0;
-    }
-    
-    .message.user .message-avatar {
-      background: #667eea;
-    }
-    
-    .message-content {
-      background: #f8f9fa;
-      padding: 0.75rem 1rem;
-      border-radius: 12px;
-    }
-    
-    .message.user .message-content {
-      background: #667eea;
-      color: white;
-    }
-    
-    .message-content p {
-      margin: 0;
-      line-height: 1.5;
-    }
-    
-    .message-time {
-      font-size: 0.75rem;
-      color: #999;
-      display: block;
-      margin-top: 0.25rem;
-    }
-    
-    .message.user .message-time {
-      color: rgba(255, 255, 255, 0.7);
-    }
-    
-    .typing-indicator {
-      display: flex;
-      gap: 4px;
-      padding: 0.5rem 0;
-    }
-    
-    .typing-indicator span {
-      width: 8px;
-      height: 8px;
-      background: #667eea;
-      border-radius: 50%;
-      animation: typing 1.4s infinite ease-in-out;
-    }
-    
-    .typing-indicator span:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-    
-    .typing-indicator span:nth-child(3) {
-      animation-delay: 0.4s;
-    }
-    
-    @keyframes typing {
-      0%, 60%, 100% { transform: translateY(0); }
-      30% { transform: translateY(-5px); }
-    }
-    
-    .chat-input {
-      display: flex;
-      gap: 0.75rem;
-      padding: 1rem 1.5rem;
-      border-top: 1px solid #e0e0e0;
-      background: #f8f9fa;
-    }
-    
-    .chat-input input {
-      flex: 1;
-    }
-  `]
+  templateUrl: './chatbot.component.html',
+  styleUrls: ['./chatbot.component.css']
 })
-export class ChatbotComponent {
-  messages: Message[] = [];
-  question = '';
-  loading = false;
+export class ChatbotComponent implements OnInit, AfterViewChecked {
+  @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
-  constructor(private chatbotService: ChatbotService) {}
+  messages: ChatMessage[] = [];
+  userInput: string = '';
+  loading: boolean = false;
+  dataLoaded: boolean = false;
 
-  askQuestion(question: string): void {
-    this.question = question;
-    this.sendMessage();
+  constructor(
+    private chatbotService: ChatbotService,
+    private sanitizer: DomSanitizer
+  ) {}
+
+  ngOnInit(): void {
+    this.addBotMessage("Bonjour ! 👋 Je charge les données de l'inventaire...");
+    this.loadData();
+  }
+
+  ngAfterViewChecked(): void {
+    this.scrollToBottom();
+  }
+
+  loadData(): void {
+    this.loading = true;
+    this.chatbotService.loadAppData().subscribe({
+      next: (data) => {
+        this.dataLoaded = true;
+        this.loading = false;
+        this.addBotMessage(
+          `✅ Données chargées avec succès !\n\n` +
+          `📊 **Résumé :**\n` +
+          `• ${data.equipment.length} équipements\n` +
+          `• ${data.employeesCount} employés\n` +
+          `• ${data.locationsCount} localisations\n\n` +
+          `Que souhaitez-vous savoir ? (Tapez "aide" pour voir les commandes)`
+        );
+      },
+      error: (error) => {
+        this.loading = false;
+        this.addBotMessage("❌ Erreur lors du chargement des données. Veuillez réessayer.");
+        console.error('Error loading data:', error);
+      }
+    });
   }
 
   sendMessage(): void {
-    if (!this.question.trim() || this.loading) return;
+    if (!this.userInput.trim()) {
+      return;
+    }
+
+    // Ajouter le message de l'utilisateur
+    this.addUserMessage(this.userInput);
+
+    // Traiter le message
+    const response = this.chatbotService.processMessage(this.userInput);
     
-    const userMessage: Message = {
-      text: this.question,
+    // Ajouter la réponse du bot
+    setTimeout(() => {
+      this.addBotMessage(response);
+    }, 500);
+
+    // Réinitialiser l'input
+    this.userInput = '';
+  }
+
+  addUserMessage(text: string): void {
+    this.messages.push({
+      text,
       isUser: true,
       timestamp: new Date()
-    };
-    this.messages.push(userMessage);
-    
-    const questionText = this.question;
-    this.question = '';
-    this.loading = true;
-    
-    this.chatbotService.query(questionText).subscribe({
-      next: (response) => {
-        const botMessage: Message = {
-          text: response.answer,
-          isUser: false,
-          timestamp: new Date()
-        };
-        this.messages.push(botMessage);
-        this.loading = false;
-      },
-      error: (err) => {
-        const errorMessage: Message = {
-          text: 'Désolé, une erreur est survenue. Veuillez réessayer.',
-          isUser: false,
-          timestamp: new Date()
-        };
-        this.messages.push(errorMessage);
-        this.loading = false;
-      }
     });
+  }
+
+  addBotMessage(text: string): void {
+    this.messages.push({
+      text,
+      isUser: false,
+      timestamp: new Date()
+    });
+  }
+
+  formatMessage(text: string): SafeHtml {
+    // Convertir le markdown simple en HTML
+    let formatted = text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // **texte** -> <strong>
+      .replace(/\n/g, '<br>'); // Sauts de ligne
+
+    return this.sanitizer.sanitize(1, formatted) || '';
+  }
+
+  scrollToBottom(): void {
+    try {
+      this.messagesContainer.nativeElement.scrollTop = 
+        this.messagesContainer.nativeElement.scrollHeight;
+    } catch(err) { }
+  }
+
+  onKeyPress(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.sendMessage();
+    }
+  }
+
+  clearChat(): void {
+    this.messages = [];
+    this.addBotMessage("💬 Chat réinitialisé. Comment puis-je vous aider ?");
+  }
+
+  refreshData(): void {
+    this.addBotMessage("🔄 Actualisation des données...");
+    this.loadData();
   }
 }

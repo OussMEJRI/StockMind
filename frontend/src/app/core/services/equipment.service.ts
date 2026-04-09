@@ -44,11 +44,16 @@ export class EquipmentService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  assignEquipment(equipmentId: number, employeeId: number, notes?: string): Observable<Equipment> {
-    return this.http.post<Equipment>(`${this.apiUrl}/assign`, {
-      equipment_id: equipmentId,
-      employee_id: employeeId,
-      notes
-    });
+  // Nouvelle méthode d'assignation compatible avec le backend
+  assignEquipment(equipmentId: number, employeeId: number): Observable<Equipment> {
+    return this.http.post<Equipment>(
+      `${this.apiUrl}/${equipmentId}/assign?employee_id=${employeeId}`, 
+      {}
+    );
+  }
+
+  // Nouvelle méthode de désassignation
+  unassignEquipment(equipmentId: number): Observable<Equipment> {
+    return this.http.post<Equipment>(`${this.apiUrl}/${equipmentId}/unassign`, {});
   }
 }

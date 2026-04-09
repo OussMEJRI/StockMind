@@ -1,0 +1,114 @@
+<div class="container">
+  <div class="header">
+    <h1>{{ isEditMode ? 'Modifier' : 'Nouvelle' }} Localisation</h1>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    Chargement...
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <form [formGroup]="locationForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
+    <div class="form-grid">
+      <!-- Site -->
+      <div class="form-group">
+        <label for="site">Site <span class="required">*</span></label>
+        <select 
+          id="site" 
+          formControlName="site" 
+          [class.invalid]="isFieldInvalid('site')">
+          <option value="">Sélectionner un site</option>
+          <option *ngFor="let site of sites" [value]="site">{{ site }}</option>
+        </select>
+        <div class="error-message" *ngIf="isFieldInvalid('site')">
+          Le site est obligatoire
+        </div>
+      </div>
+
+      <!-- Étage -->
+      <div class="form-group">
+        <label for="etage">Étage <span class="required">*</span></label>
+        <select 
+          id="etage" 
+          formControlName="etage" 
+          [class.invalid]="isFieldInvalid('etage')">
+          <option value="">Sélectionner un étage</option>
+          <option *ngFor="let etage of etages" [value]="etage">{{ etage }}</option>
+        </select>
+        <div class="error-message" *ngIf="isFieldInvalid('etage')">
+          L'étage est obligatoire
+        </div>
+      </div>
+
+      <!-- Rosace -->
+      <div class="form-group">
+        <label for="rosace">Rosace <span class="required">*</span></label>
+        <select 
+          id="rosace" 
+          formControlName="rosace" 
+          [class.invalid]="isFieldInvalid('rosace')">
+          <option value="">Sélectionner une rosace</option>
+          <option *ngFor="let rosace of rosaces" [value]="rosace">Rosace {{ rosace }}</option>
+        </select>
+        <div class="error-message" *ngIf="isFieldInvalid('rosace')">
+          La rosace est obligatoire
+        </div>
+      </div>
+
+      <!-- Position exacte (générée automatiquement) -->
+      <div class="form-group full-width">
+        <label for="name">Position exacte <span class="required">*</span></label>
+        <input 
+          type="text" 
+          id="name" 
+          formControlName="name" 
+          readonly
+          placeholder="Sera généré automatiquement"
+          [class.invalid]="isFieldInvalid('name')">
+        <small class="help-text">Format: Site - Étage - Rosace X</small>
+      </div>
+
+      <!-- Adresse -->
+      <div class="form-group full-width">
+        <label for="address">Adresse</label>
+        <input 
+          type="text" 
+          id="address" 
+          formControlName="address" 
+          placeholder="Ex: Avenue Habib Bourguiba">
+      </div>
+
+      <!-- Ville -->
+      <div class="form-group">
+        <label for="city">Ville</label>
+        <input 
+          type="text" 
+          id="city" 
+          formControlName="city" 
+          placeholder="Ex: Tunis">
+      </div>
+
+      <!-- Pays -->
+      <div class="form-group">
+        <label for="country">Pays</label>
+        <input 
+          type="text" 
+          id="country" 
+          formControlName="country" 
+          placeholder="Ex: Tunisie">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="cancel()">
+        Annuler
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="loading">
+        {{ isEditMode ? 'Modifier' : 'Créer' }}
+      </button>
+    </div>
+  </form>
+</div>

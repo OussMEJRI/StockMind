@@ -20,6 +20,7 @@ import { EquipmentFormComponent } from './features/equipment/equipment-form/equi
 import { EmployeeListComponent } from './features/employees/employee-list/employee-list.component';
 import { EmployeeFormComponent } from './features/employees/employee-form/employee-form.component';
 import { LocationListComponent } from './features/locations/location-list/location-list.component';
+import { LocationFormComponent } from './features/locations/location-form/location-form.component';
 import { ChatbotComponent } from './features/chatbot/chatbot.component';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 
@@ -31,6 +32,7 @@ import { NavbarComponent } from './shared/components/navbar/navbar.component';
     EquipmentListComponent,
     EquipmentFormComponent,
     LocationListComponent,
+    LocationFormComponent,
     ChatbotComponent,
     NavbarComponent
   ],
@@ -42,6 +44,7 @@ import { NavbarComponent } from './shared/components/navbar/navbar.component';
     FormsModule,
     ReactiveFormsModule,
     AppRoutingModule,
+    // Composants standalone
     EmployeeListComponent,
     EmployeeFormComponent
   ],

@@ -1,0 +1,18 @@
+<nav class="navbar">
+  <div class="navbar-brand">
+    <h1>📦 IT Inventory</h1>
+  </div>
+  
+  <ul class="navbar-menu">
+    <li><a routerLink="/dashboard" routerLinkActive="active">🏠 Dashboard</a></li>
+    <li><a routerLink="/equipment" routerLinkActive="active">💻 Équipements</a></li>
+    <li><a routerLink="/employees" routerLinkActive="active">👥 Employés</a></li>
+    <li><a routerLink="/locations" routerLinkActive="active">🏢 Localisations</a></li>
+    <li><a routerLink="/chatbot" routerLinkActive="active">🤖 Chatbot</a></li>
+  </ul>
+  
+  <div class="navbar-user">
+    <span>{{ currentUser?.full_name || currentUser?.email }}</span>
+    <button class="btn-logout" (click)="logout()">🚪 Déconnexion</button>
+  </div>
+</nav>

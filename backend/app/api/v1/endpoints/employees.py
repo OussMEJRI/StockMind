@@ -2,98 +2,60 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
-from app.core import deps
-from app.crud import employee as employee_crud
+from app.core.deps import get_db
+from app.models.employee import Employee as EmployeeModel
 from app.schemas.employee import Employee, EmployeeCreate, EmployeeUpdate
 
 router = APIRouter()
 
-
-@router.get("/", response_model=List[Employee])
-def get_employees(
-    db: Session = Depends(deps.get_db),
-    skip: int = 0,
-    limit: int = 100,
-):
-    """
-    Récupérer la liste des employés
-    """
-    employees = employee_crud.get_multi(db, skip=skip, limit=limit)
+@router.get("", response_model=List[Employee])
+def get_employees(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    """Récupérer tous les employés"""
+    employees = db.query(EmployeeModel).offset(skip).limit(limit).all()
     return employees
 
-
-@router.post("/", response_model=Employee)
-def create_employee(
-    *,
-    db: Session = Depends(deps.get_db),
-    employee_in: EmployeeCreate,
-):
-    """
-    Créer un nouvel employé
-    """
-    # Vérifier si l'email existe déjà
-    existing_employee = employee_crud.get_by_email(db, email=employee_in.email)
-    if existing_employee:
-        raise HTTPException(
-            status_code=400,
-            detail="Un employé avec cet email existe déjà"
-        )
+@router.post("", response_model=Employee, status_code=201)
+def create_employee(employee: EmployeeCreate, db: Session = Depends(get_db)):
+    """Créer un nouvel employé"""
+    existing = db.query(EmployeeModel).filter(EmployeeModel.cuid == employee.cuid).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="CUID already exists")
     
-    employee = employee_crud.create(db, employee_in)
-    return employee
-
+    db_employee = EmployeeModel(**employee.dict())
+    db.add(db_employee)
+    db.commit()
+    db.refresh(db_employee)
+    return db_employee
 
 @router.get("/{employee_id}", response_model=Employee)
-def get_employee(
-    employee_id: int,
-    db: Session = Depends(deps.get_db),
-):
-    """
-    Récupérer un employé par son ID
-    """
-    employee = employee_crud.get(db, employee_id)
+def get_employee(employee_id: int, db: Session = Depends(get_db)):
+    """Récupérer un employé par ID"""
+    employee = db.query(EmployeeModel).filter(EmployeeModel.id == employee_id).first()
     if not employee:
-        raise HTTPException(status_code=404, detail="Employé non trouvé")
+        raise HTTPException(status_code=404, detail="Employee not found")
     return employee
-
 
 @router.put("/{employee_id}", response_model=Employee)
-def update_employee(
-    *,
-    db: Session = Depends(deps.get_db),
-    employee_id: int,
-    employee_in: EmployeeUpdate,
-):
-    """
-    Mettre à jour un employé
-    """
-    employee = employee_crud.get(db, employee_id)
-    if not employee:
-        raise HTTPException(status_code=404, detail="Employé non trouvé")
+def update_employee(employee_id: int, employee: EmployeeUpdate, db: Session = Depends(get_db)):
+    """Mettre à jour un employé"""
+    db_employee = db.query(EmployeeModel).filter(EmployeeModel.id == employee_id).first()
+    if not db_employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
     
-    # Vérifier si l'email existe déjà (si modifié)
-    if employee_in.email and employee_in.email != employee.email:
-        existing_employee = employee_crud.get_by_email(db, email=employee_in.email)
-        if existing_employee:
-            raise HTTPException(
-                status_code=400,
-                detail="Un employé avec cet email existe déjà"
-            )
+    for key, value in employee.dict(exclude_unset=True).items():
+        setattr(db_employee, key, value)
     
-    employee = employee_crud.update(db, employee, employee_in)
-    return employee
-
+    db.commit()
+    db.refresh(db_employee)
+    return db_employee
 
 @router.delete("/{employee_id}")
-def delete_employee(
-    employee_id: int,
-    db: Session = Depends(deps.get_db),
-):
-    """
-    Supprimer un employé
-    """
-    success = employee_crud.delete(db, employee_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Employé non trouvé")
+def delete_employee(employee_id: int, db: Session = Depends(get_db)):
+    """Supprimer un employé"""
+    db_employee = db.query(EmployeeModel).filter(EmployeeModel.id == employee_id).first()
+    if not db_employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
     
-    return {"message": "Employé supprimé avec succès"}
+    db.delete(db_employee)
+    db.commit()
+    return {"message": "Employee deleted successfully"}
