@@ -1,13 +1,13 @@
 <div class="container">
   <div class="header">
-    <h1>Gestion des Localisations</h1>
+    <h1>Gestion des Emplacements</h1>
     <button class="btn btn-primary" (click)="addLocation()">
-      ➕ Nouvelle Localisation
+      ➕ Nouvelle Emplacement
     </button>
   </div>
 
   <div *ngIf="loading" class="loading">
-    Chargement des localisations...
+    Chargement des emplacements...
   </div>
 
   <div *ngIf="error" class="error">
@@ -46,7 +46,7 @@
         </tr>
         <tr *ngIf="locations.length === 0">
           <td colspan="7" class="no-data">
-            Aucune localisation trouvée. Cliquez sur "Nouvelle Localisation" pour en ajouter une.
+            Aucune emplacement trouvée. Cliquez sur "Nouvelle Emplacement" pour en ajouter une.
           </td>
         </tr>
       </tbody>

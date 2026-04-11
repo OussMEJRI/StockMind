@@ -1,90 +1,98 @@
 <div class="dashboard-container">
-  <h1>Tableau de bord</h1>
-
-  <div *ngIf="loading" class="loading">
-    Chargement des données...
+  <div class="dashboard-header">
+    <h1>📊 Tableau de Bord</h1>
+    <button class="btn btn-primary" (click)="refresh()">
+      🔄 Actualiser
+    </button>
   </div>
 
-  <div *ngIf="error" class="error">
+  <div class="alert alert-error" *ngIf="error">
     {{ error }}
+    <button class="btn btn-sm" (click)="refresh()">Réessayer</button>
   </div>
 
-  <div *ngIf="!loading && !error" class="dashboard-content">
-    <!-- Stats Cards -->
-    <div class="stats-grid">
-      <div class="stat-card" (click)="navigateTo('/equipment')">
-        <div class="stat-icon">💻</div>
-        <div class="stat-info">
-          <h3>{{ stats.totalEquipment }}</h3>
-          <p>Équipements</p>
-        </div>
-      </div>
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Chargement des données...</p>
+  </div>
 
-      <div class="stat-card" (click)="navigateTo('/employees')">
-        <div class="stat-icon">👥</div>
-        <div class="stat-info">
-          <h3>{{ stats.totalEmployees }}</h3>
-          <p>Employés</p>
-        </div>
-      </div>
-
-      <div class="stat-card" (click)="navigateTo('/locations')">
-        <div class="stat-icon">🏢</div>
-        <div class="stat-info">
-          <h3>{{ stats.totalLocations }}</h3>
-          <p>Localisations</p>
-        </div>
-      </div>
-
-      <div class="stat-card assigned">
-        <div class="stat-icon">✅</div>
-        <div class="stat-info">
-          <h3>{{ stats.assignedEquipment }}</h3>
-          <p>Assignés</p>
-        </div>
-      </div>
-
-      <div class="stat-card available">
-        <div class="stat-icon">📦</div>
-        <div class="stat-info">
-          <h3>{{ stats.availableEquipment }}</h3>
-          <p>Disponibles</p>
-        </div>
+  <div class="stats-grid" *ngIf="!loading">
+    <div class="stat-card">
+      <div class="stat-icon">💻</div>
+      <div class="stat-content">
+        <div class="stat-value">{{ totalEquipment }}</div>
+        <div class="stat-label">Total Équipements</div>
       </div>
     </div>
 
-    <!-- Recent Equipment -->
-    <div class="recent-section">
-      <h2>Équipements récents</h2>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Type</th>
-              <th>Modèle</th>
-              <th>Numéro de série</th>
-              <th>Condition</th>
-              <th>Statut</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let equipment of recentEquipment">
-              <td>{{ equipment.equipment_type }}</td>
-              <td>{{ equipment.model }}</td>
-              <td>{{ equipment.serial_number }}</td>
-              <td>{{ equipment.condition }}</td>
-              <td>
-                <span [class]="getStatusClass(equipment)">
-                  {{ getStatusText(equipment) }}
-                </span>
-              </td>
-            </tr>
-            <tr *ngIf="recentEquipment.length === 0">
-              <td colspan="5" class="no-data">Aucun équipement trouvé</td>
-            </tr>
-          </tbody>
-        </table>
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-content">
+        <div class="stat-value">{{ totalEmployees }}</div>
+        <div class="stat-label">Total Employés</div>
       </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">📦</div>
+      <div class="stat-content">
+        <div class="stat-value">{{ equipmentInStock }}</div>
+        <div class="stat-label">En Stock</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-content">
+        <div class="stat-value">{{ equipmentAssigned }}</div>
+        <div class="stat-label">Assignés</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="recent-section" *ngIf="!loading">
+    <h2>📋 Équipements Récents</h2>
+    
+    <div class="no-data" *ngIf="recentEquipment.length === 0">
+      <p>Aucun équipement trouvé</p>
+      <button class="btn btn-primary" routerLink="/equipment/new">
+        ➕ Ajouter un équipement
+      </button>
+    </div>
+
+    <table class="data-table" *ngIf="recentEquipment.length > 0">
+      <thead>
+        <tr>
+          <th>SN</th>
+          <th>Type</th>
+          <th>Modèle</th>
+          <th>État</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let equipment of recentEquipment">
+          <td>{{ equipment.serial_number }}</td>
+          <td>{{ equipment.equipment_type }}</td>
+          <td>{{ equipment.model }}</td>
+          <td>
+            <span class="badge" [ngClass]="'badge-' + equipment.condition">
+              {{ equipment.condition }}
+            </span>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="'badge-' + equipment.status">
+              {{ equipment.status }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="view-all" *ngIf="recentEquipment.length > 0">
+      <button class="btn btn-secondary" routerLink="/equipment">
+        Voir tous les équipements →
+      </button>
     </div>
   </div>
 </div>

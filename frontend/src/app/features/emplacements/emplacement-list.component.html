@@ -1,0 +1,110 @@
+<div class="emplacement-list-container">
+  <div class="header">
+    <h2>Gestion des Emplacements</h2>
+    <div class="actions">
+      <button mat-raised-button color="primary" (click)="exportData('csv')">
+        <mat-icon>download</mat-icon>
+        Exporter CSV
+      </button>
+      <button mat-raised-button color="primary" (click)="exportData('excel')">
+        <mat-icon>download</mat-icon>
+        Exporter Excel
+      </button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <mat-form-field>
+      <mat-label>Rechercher</mat-label>
+      <input matInput [(ngModel)]="searchTerm" (keyup.enter)="applyFilters()" placeholder="Rechercher...">
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Étage</mat-label>
+      <mat-select [(ngModel)]="selectedEtage" (selectionChange)="applyFilters()">
+        <mat-option value="">Tous</mat-option>
+        <mat-option *ngFor="let etage of etages" [value]="etage">{{ etage }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Désignation</mat-label>
+      <mat-select [(ngModel)]="selectedDesignation" (selectionChange)="applyFilters()">
+        <mat-option value="">Toutes</mat-option>
+        <mat-option *ngFor="let designation of designations" [value]="designation">{{ designation }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-raised-button (click)="clearFilters()">
+      <mat-icon>clear</mat-icon>
+      Réinitialiser
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <div *ngIf="error" class="error">
+    <mat-icon>error</mat-icon>
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error" class="table-container">
+    <table mat-table [dataSource]="filteredEmplacements" class="mat-elevation-z8">
+      
+      <ng-container matColumnDef="equipment">
+        <th mat-header-cell *matHeaderCellDef>Équipement</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.equipment?.serial_number || 'N/A' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="designation">
+        <th mat-header-cell *matHeaderCellDef>Désignation</th>
+        <td mat-cell *matCellDef="let element">
+          <span class="badge">{{ element.designation }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="etage">
+        <th mat-header-cell *matHeaderCellDef>Étage</th>
+        <td mat-cell *matCellDef="let element">{{ element.etage || '-' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="rosace">
+        <th mat-header-cell *matHeaderCellDef>Rosace</th>
+        <td mat-cell *matCellDef="let element">{{ element.rosace || '-' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let element">{{ element.type_emplacement || '-' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="emplacement_exact">
+        <th mat-header-cell *matHeaderCellDef>Emplacement Exact</th>
+        <td mat-cell *matCellDef="let element">{{ element.emplacement_exact || '-' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let element">
+          <button mat-icon-button color="warn" (click)="deleteEmplacement(element.id!)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <mat-paginator 
+      [length]="totalItems"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[5, 10, 25, 50]"
+      (page)="onPageChange($event)">
+    </mat-paginator>
+  </div>
+</div>

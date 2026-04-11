@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Observable, forkJoin, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
-import { EquipmentService } from './equipment.service';
-import { EmployeeService } from './employee.service';
-import { LocationService } from './location.service';
+import { HttpClient } from '@angular/common/http';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 import { Equipment, EquipmentStatus, EquipmentCondition } from '../models/equipment.model';
+import { Employee } from '../models/employee.model';
 
-export interface ChatMessage {
+export interface Message {
   text: string;
   isUser: boolean;
   timestamp: Date;
@@ -14,281 +14,183 @@ export interface ChatMessage {
 
 export interface AppData {
   equipment: Equipment[];
-  employeesCount: number;
-  locationsCount: number;
+  employees: Employee[];
+  emplacements: any[];
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatbotService {
+  private messagesSubject = new BehaviorSubject<Message[]>([]);
+  public messages$ = this.messagesSubject.asObservable();
+  
   private appData: AppData | null = null;
 
-  constructor(
-    private equipmentService: EquipmentService,
-    private employeeService: EmployeeService,
-    private locationService: LocationService
-  ) {}
+  constructor(private http: HttpClient) {
+    this.addBotMessage("Bonjour ! Je suis votre assistant virtuel. Comment puis-je vous aider ?");
+  }
 
   loadAppData(): Observable<AppData> {
-    return forkJoin({
-      equipment: this.equipmentService.getEquipment(),
-      employees: this.employeeService.getEmployees(),
-      locations: this.locationService.getLocations()
-    }).pipe(
-      map(result => {
-        this.appData = {
-          equipment: result.equipment,
-          employeesCount: result.employees.length,
-          locationsCount: result.locations.total
-        };
-        return this.appData;
-      }),
-      catchError(error => {
-        console.error('Error loading app data:', error);
-        return of({
-          equipment: [],
-          employeesCount: 0,
-          locationsCount: 0
-        });
+    return this.http.get<any>(`${environment.apiUrl}/chatbot/data`).pipe(
+      map(data => {
+        this.appData = data;
+        return data;
       })
     );
   }
 
-  processMessage(message: string): string {
+  sendMessage(userMessage: string): void {
+    this.addUserMessage(userMessage);
+    
     if (!this.appData) {
-      return "Je charge les données, veuillez patienter...";
+      this.loadAppData().subscribe(() => {
+        this.processMessage(userMessage);
+      });
+    } else {
+      this.processMessage(userMessage);
     }
-
-    const lowerMessage = message.toLowerCase();
-
-    // Questions sur les équipements
-    if (this.matchesKeywords(lowerMessage, ['équipement', 'equipement', 'stock', 'matériel', 'materiel'])) {
-      return this.getEquipmentInfo(lowerMessage);
-    }
-
-    // Questions sur les employés
-    if (this.matchesKeywords(lowerMessage, ['employé', 'employe', 'personnel', 'collaborateur', 'utilisateur'])) {
-      return this.getEmployeeInfo(lowerMessage);
-    }
-
-    // Questions sur les localisations
-    if (this.matchesKeywords(lowerMessage, ['localisation', 'emplacement', 'lieu', 'bureau', 'rosace', 'étage', 'etage'])) {
-      return this.getLocationInfo(lowerMessage);
-    }
-
-    // Questions générales
-    if (this.matchesKeywords(lowerMessage, ['total', 'combien', 'nombre', 'statistique', 'stat'])) {
-      return this.getGeneralStats();
-    }
-
-    // Questions sur les PC
-    if (this.matchesKeywords(lowerMessage, ['pc', 'ordinateur', 'computer'])) {
-      return this.getEquipmentByType('pc');
-    }
-
-    // Questions sur les laptops
-    if (this.matchesKeywords(lowerMessage, ['laptop', 'portable', 'notebook'])) {
-      return this.getEquipmentByType('laptop');
-    }
-
-    // Questions sur les moniteurs
-    if (this.matchesKeywords(lowerMessage, ['moniteur', 'écran', 'ecran', 'monitor', 'display'])) {
-      return this.getEquipmentByType('monitor');
-    }
-
-    // Questions sur les téléphones
-    if (this.matchesKeywords(lowerMessage, ['téléphone', 'telephone', 'phone', 'mobile'])) {
-      return this.getEquipmentByType('phone');
-    }
-
-    // Questions sur les accessoires
-    if (this.matchesKeywords(lowerMessage, ['accessoire', 'accessory', 'périphérique', 'peripherique'])) {
-      return this.getEquipmentByType('accessory');
-    }
-
-    // Questions sur les équipements disponibles
-    if (this.matchesKeywords(lowerMessage, ['disponible', 'libre', 'available'])) {
-      return this.getAvailableEquipment();
-    }
-
-    // Questions sur les équipements assignés
-    if (this.matchesKeywords(lowerMessage, ['assigné', 'assigne', 'attribué', 'attribue', 'assigned'])) {
-      return this.getAssignedEquipment();
-    }
-
-    // Aide
-    if (this.matchesKeywords(lowerMessage, ['aide', 'help', 'comment', 'que peux-tu', 'que peux tu'])) {
-      return this.getHelp();
-    }
-
-    // Salutations
-    if (this.matchesKeywords(lowerMessage, ['bonjour', 'salut', 'hello', 'hi', 'hey'])) {
-      return "Bonjour ! 👋 Je suis votre assistant IT Inventory. Je peux vous donner des informations sur vos équipements, employés et localisations. Que souhaitez-vous savoir ?";
-    }
-
-    // Remerciements
-    if (this.matchesKeywords(lowerMessage, ['merci', 'thanks', 'thank you'])) {
-      return "De rien ! 😊 N'hésitez pas si vous avez d'autres questions.";
-    }
-
-    // Message par défaut
-    return "Je n'ai pas compris votre question. Tapez 'aide' pour voir ce que je peux faire.";
   }
 
-  private matchesKeywords(message: string, keywords: string[]): boolean {
-    return keywords.some(keyword => message.includes(keyword));
+  private processMessage(message: string): void {
+    const lowerMessage = message.toLowerCase();
+    let response = '';
+
+    if (lowerMessage.includes('bonjour') || lowerMessage.includes('salut')) {
+      response = 'Bonjour ! Comment puis-je vous aider aujourd\'hui ?';
+    } else if (lowerMessage.includes('aide') || lowerMessage.includes('help')) {
+      response = this.getHelpMessage();
+    } else if (lowerMessage.includes('statistique') || lowerMessage.includes('stat')) {
+      response = this.getStatistics();
+    } else if (lowerMessage.includes('équipement') || lowerMessage.includes('equipment')) {
+      response = this.getEquipmentInfo(lowerMessage);
+    } else if (lowerMessage.includes('employé') || lowerMessage.includes('employee')) {
+      response = this.getEmployeeInfo(lowerMessage);
+    } else if (lowerMessage.includes('emplacement') || lowerMessage.includes('location')) {
+      response = this.getEmplacementInfo(lowerMessage);
+    } else {
+      response = 'Je ne suis pas sûr de comprendre. Tapez "aide" pour voir ce que je peux faire.';
+    }
+
+    setTimeout(() => this.addBotMessage(response), 500);
+  }
+
+  private getHelpMessage(): string {
+    return `Je peux vous aider avec :
+    
+📊 Statistiques - "statistiques" ou "stats"
+💻 Équipements - "équipements" ou "liste des laptops"
+👥 Employés - "employés" ou "liste des employés"
+📍 Emplacements - "emplacements" ou "où est..."
+
+Posez-moi une question !`;
+  }
+
+  private getStatistics(): string {
+    if (!this.appData) return 'Chargement des données...';
+
+    const totalEquipment = this.appData.equipment.length;
+    const totalEmployees = this.appData.employees.length;
+    const assignedEquipment = this.appData.equipment.filter(e => e.status === EquipmentStatus.IN_STOCK).length;
+    const inStockEquipment = this.appData.equipment.filter(e => e.status === EquipmentStatus.ASSIGNED).length;
+
+    return `📊 Statistiques actuelles:
+
+💻 Équipements: ${totalEquipment}
+   - Assignés: ${assignedEquipment}
+   - En stock: ${inStockEquipment}
+
+👥 Employés: ${totalEmployees}
+
+📍 Emplacements: ${this.appData.emplacements.length}`;
   }
 
   private getEquipmentInfo(message: string): string {
-    const total = this.appData!.equipment.length;
-    const inStock = this.appData!.equipment.filter(e => e.status === EquipmentStatus.IN_STOCK).length;
-    const assigned = this.appData!.equipment.filter(e => e.status === EquipmentStatus.ASSIGNED).length;
+    if (!this.appData) return 'Chargement des données...';
 
-    return `📊 **Informations sur les équipements :**\n\n` +
-           `• Total : **${total}** équipements\n` +
-           `• En stock : **${inStock}** équipements\n` +
-           `• Assignés : **${assigned}** équipements\n\n` +
-           `Vous pouvez me demander des détails sur un type spécifique (PC, laptop, moniteur, etc.)`;
+    if (message.includes('laptop') || message.includes('portable')) {
+      const laptops = this.appData.equipment.filter(e => e.equipment_type === 'laptop');
+      const assigned = laptops.filter(e => e.status === EquipmentStatus.ASSIGNED).length;
+      const inStock = laptops.filter(e => e.status === EquipmentStatus.IN_STOCK).length;
+      
+      return `💻 Laptops:
+      
+Total: ${laptops.length}
+- Assignés: ${assigned}
+- En stock: ${inStock}`;
+    }
+
+    if (message.includes('condition')) {
+      const newEquip = this.appData.equipment.filter(e => e.condition === EquipmentCondition.NEW).length;
+      const used = this.appData.equipment.filter(e => e.condition === EquipmentCondition.USED).length;
+      const refurbished = this.appData.equipment.filter(e => e.condition === EquipmentCondition.REFURBISHED).length;
+      
+      return `🔧 État des équipements:
+      
+- Neufs: ${newEquip}
+- Utilisés: ${used}
+- Reconditionnés: ${refurbished}`;
+    }
+
+    return `💻 Équipements disponibles:
+
+Total: ${this.appData.equipment.length}
+Types: laptop, pc, monitor, keyboard, mouse, printer, server
+
+Demandez-moi des détails sur un type spécifique !`;
   }
 
   private getEmployeeInfo(message: string): string {
-    const total = this.appData!.employeesCount;
-    const withEquipment = this.appData!.equipment.filter(e => e.employee_id).length;
+    if (!this.appData) return 'Chargement des données...';
 
-    return `👥 **Informations sur les employés :**\n\n` +
-           `• Total : **${total}** employés\n` +
-           `• Avec équipement : **${withEquipment}** employés\n` +
-           `• Sans équipement : **${total - withEquipment}** employés`;
-  }
+    const byDepartment = this.appData.employees.reduce((acc: any, emp) => {
+      acc[emp.department] = (acc[emp.department] || 0) + 1;
+      return acc;
+    }, {});
 
-  private getLocationInfo(message: string): string {
-    const total = this.appData!.locationsCount;
-    const withEquipment = new Set(this.appData!.equipment.filter(e => e.location_id).map(e => e.location_id)).size;
-
-    return `🏢 **Informations sur les localisations :**\n\n` +
-           `• Total : **${total}** localisations\n` +
-           `• Avec équipement : **${withEquipment}** localisations\n` +
-           `• Vides : **${total - withEquipment}** localisations`;
-  }
-
-  private getGeneralStats(): string {
-    const totalEquipment = this.appData!.equipment.length;
-    const totalEmployees = this.appData!.employeesCount;
-    const totalLocations = this.appData!.locationsCount;
-    const inStock = this.appData!.equipment.filter(e => e.status === EquipmentStatus.IN_STOCK).length;
-    const assigned = this.appData!.equipment.filter(e => e.status === EquipmentStatus.ASSIGNED).length;
-
-    return `📈 **Statistiques générales :**\n\n` +
-           `**Équipements :**\n` +
-           `• Total : ${totalEquipment}\n` +
-           `• En stock : ${inStock}\n` +
-           `• Assignés : ${assigned}\n\n` +
-           `**Employés :** ${totalEmployees}\n` +
-           `**Localisations :** ${totalLocations}`;
-  }
-
-  private getEquipmentByType(type: string): string {
-    const equipment = this.appData!.equipment.filter(e => e.equipment_type === type);
-    const total = equipment.length;
-    const inStock = equipment.filter(e => e.status === EquipmentStatus.IN_STOCK).length;
-    const assigned = equipment.filter(e => e.status === EquipmentStatus.ASSIGNED).length;
-    const newCondition = equipment.filter(e => e.condition === EquipmentCondition.NEW).length;
-    const used = equipment.filter(e => e.condition === EquipmentCondition.USED).length;
-    const outOfService = equipment.filter(e => e.condition === EquipmentCondition.OUT_OF_SERVICE).length;
-
-    const typeNames: { [key: string]: string } = {
-      'pc': 'PC',
-      'laptop': 'Laptops',
-      'monitor': 'Moniteurs',
-      'phone': 'Téléphones',
-      'accessory': 'Accessoires'
-    };
-
-    return `💻 **${typeNames[type]} :**\n\n` +
-           `• Total : **${total}**\n` +
-           `• En stock : **${inStock}**\n` +
-           `• Assignés : **${assigned}**\n\n` +
-           `**État :**\n` +
-           `• Neuf : ${newCondition}\n` +
-           `• Utilisé : ${used}\n` +
-           `• Hors service : ${outOfService}`;
-  }
-
-  private getAvailableEquipment(): string {
-    const available = this.appData!.equipment.filter(e => e.status === EquipmentStatus.IN_STOCK);
-    const total = available.length;
-
-    if (total === 0) {
-      return "❌ Aucun équipement disponible actuellement.";
-    }
-
-    const byType: { [key: string]: number } = {};
-    available.forEach(e => {
-      byType[e.equipment_type] = (byType[e.equipment_type] || 0) + 1;
-    });
-
-    const typeNames: { [key: string]: string } = {
-      'pc': 'PC',
-      'laptop': 'Laptops',
-      'monitor': 'Moniteurs',
-      'phone': 'Téléphones',
-      'accessory': 'Accessoires'
-    };
-
-    let response = `✅ **Équipements disponibles : ${total}**\n\n`;
-    Object.entries(byType).forEach(([type, count]) => {
-      response += `• ${typeNames[type]} : ${count}\n`;
+    let response = `👥 Employés par département:\n\n`;
+    Object.entries(byDepartment).forEach(([dept, count]) => {
+      response += `${dept}: ${count}\n`;
     });
 
     return response;
   }
 
-  private getAssignedEquipment(): string {
-    const assigned = this.appData!.equipment.filter(e => e.status === EquipmentStatus.ASSIGNED);
-    const total = assigned.length;
+  private getEmplacementInfo(message: string): string {
+    if (!this.appData) return 'Chargement des données...';
 
-    if (total === 0) {
-      return "❌ Aucun équipement assigné actuellement.";
-    }
+    const totalEmplacements = this.appData.emplacements.length;
+    
+    return `📍 Emplacements:
 
-    const byType: { [key: string]: number } = {};
-    assigned.forEach(e => {
-      byType[e.equipment_type] = (byType[e.equipment_type] || 0) + 1;
-    });
+Total: ${totalEmplacements}
 
-    const typeNames: { [key: string]: string } = {
-      'pc': 'PC',
-      'laptop': 'Laptops',
-      'monitor': 'Moniteurs',
-      'phone': 'Téléphones',
-      'accessory': 'Accessoires'
-    };
-
-    let response = `👤 **Équipements assignés : ${total}**\n\n`;
-    Object.entries(byType).forEach(([type, count]) => {
-      response += `• ${typeNames[type]} : ${count}\n`;
-    });
-
-    return response;
+Les équipements sont répartis dans différents emplacements.
+Demandez-moi des détails sur un emplacement spécifique !`;
   }
 
-  private getHelp(): string {
-    return `🤖 **Je peux vous aider avec :**\n\n` +
-           `📊 **Statistiques générales :**\n` +
-           `• "Combien d'équipements ?"\n` +
-           `• "Nombre total d'employés ?"\n` +
-           `• "Statistiques"\n\n` +
-           `💻 **Équipements par type :**\n` +
-           `• "Combien de PC ?"\n` +
-           `• "Laptops disponibles ?"\n` +
-           `• "Moniteurs en stock ?"\n\n` +
-           `✅ **Disponibilité :**\n` +
-           `• "Équipements disponibles ?"\n` +
-           `• "Équipements assignés ?"\n\n` +
-           `🏢 **Localisations :**\n` +
-           `• "Nombre de localisations ?"\n` +
-           `• "Bureaux disponibles ?"\n\n` +
-           `Posez-moi vos questions en langage naturel ! 😊`;
+  private addUserMessage(text: string): void {
+    const messages = this.messagesSubject.value;
+    messages.push({
+      text,
+      isUser: true,
+      timestamp: new Date()
+    });
+    this.messagesSubject.next(messages);
+  }
+
+  private addBotMessage(text: string): void {
+    const messages = this.messagesSubject.value;
+    messages.push({
+      text,
+      isUser: false,
+      timestamp: new Date()
+    });
+    this.messagesSubject.next(messages);
+  }
+
+  clearMessages(): void {
+    this.messagesSubject.next([]);
+    this.addBotMessage("Conversation réinitialisée. Comment puis-je vous aider ?");
   }
 }

@@ -45,7 +45,7 @@ backend/
 │   │       ├── auth.py          # Authentification JWT
 │   │       ├── equipment.py     # Gestion matériel
 │   │       ├── employees.py     # Gestion employés
-│   │       ├── locations.py     # Gestion localisations
+│   │       ├── locations.py     # Gestion emplacements
 │   │       └── chatbot.py       # Interface chatbot
 │   ├── core/
 │   │   ├── config.py            # Configuration
@@ -92,7 +92,7 @@ backend/
 - ✅ Suivi du numéro de série, modèle, état (neuf/utilisé/HS)
 - ✅ Statut: en stock / affecté
 
-### 2. Localisation Précise
+### 2. Emplacement Précise
 - ✅ Site, Étage, Bureau
 - ✅ Position exacte (armoire, poste)
 - ✅ Historique des mouvements
@@ -339,9 +339,9 @@ La documentation complète de l'API est disponible via Swagger UI:
 - `PUT /api/v1/employees/{id}` - Modifier un employé
 - `DELETE /api/v1/employees/{id}` - Supprimer un employé
 
-#### Localisations
-- `GET /api/v1/locations/` - Liste des localisations
-- `POST /api/v1/locations/` - Créer une localisation
+#### Emplacements
+- `GET /api/v1/locations/` - Liste des emplacements
+- `POST /api/v1/locations/` - Créer une emplacement
 
 #### Chatbot
 - `POST /api/v1/chatbot/query` - Poser une question

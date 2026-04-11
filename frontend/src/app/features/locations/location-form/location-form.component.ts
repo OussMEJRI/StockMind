@@ -80,7 +80,7 @@ export class LocationFormComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        this.error = 'Erreur lors du chargement de la localisation';
+        this.error = 'Erreur lors du chargement de la emplacement';
         this.loading = false;
         console.error('Error loading location:', error);
       }
@@ -144,8 +144,8 @@ export class LocationFormComponent implements OnInit {
       },
       error: (error) => {
         this.error = this.isEditMode 
-          ? 'Erreur lors de la modification de la localisation'
-          : 'Erreur lors de la création de la localisation';
+          ? 'Erreur lors de la modification de la emplacement'
+          : 'Erreur lors de la création de la emplacement';
         this.loading = false;
         console.error('Error saving location:', error);
       }

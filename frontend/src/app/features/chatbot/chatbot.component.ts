@@ -40,7 +40,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
           `📊 **Résumé :**\n` +
           `• ${data.equipment.length} équipements\n` +
           `• ${data.employeesCount} employés\n` +
-          `• ${data.locationsCount} localisations\n\n` +
+          `• ${data.locationsCount} emplacements\n\n` +
           `Que souhaitez-vous savoir ? (Tapez "aide" pour voir les commandes)`
         );
       },

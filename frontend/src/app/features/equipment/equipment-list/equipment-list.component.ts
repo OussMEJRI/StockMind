@@ -2,7 +2,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { EquipmentService } from '../../../core/services/equipment.service';
-import { EmployeeService, Employee } from '../../../core/services/employee.service';
+import { EmployeeService } from '../../../core/services/employee.service';
+import { Employee } from '../../../core/models/employee.model';
 import { Equipment, EquipmentType, EquipmentStatus, EquipmentCondition } from '../../../core/models/equipment.model';
 import { AuthService } from '../../../core/services/auth.service';
 

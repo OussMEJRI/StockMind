@@ -31,7 +31,7 @@ export class LocationListComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        this.error = 'Erreur lors du chargement des localisations';
+        this.error = 'Erreur lors du chargement des emplacements';
         this.loading = false;
         console.error('Error loading locations:', error);
       }
@@ -47,13 +47,13 @@ export class LocationListComponent implements OnInit {
   }
 
   deleteLocation(id: number, name: string): void {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer la localisation "${name}" ?`)) {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer la emplacement "${name}" ?`)) {
       this.locationService.deleteLocation(id).subscribe({
         next: () => {
           this.loadLocations();
         },
         error: (error) => {
-          alert('Erreur lors de la suppression de la localisation');
+          alert('Erreur lors de la suppression de la emplacement');
           console.error('Error deleting location:', error);
         }
       });

@@ -22,7 +22,7 @@ import { AuthService } from '../../../core/services/auth.service';
             👥 Employés
           </a>
           <a routerLink="/locations" routerLinkActive="active">
-            📍 Localisations
+            📍 Emplacements
           </a>
           <a routerLink="/chatbot" routerLinkActive="active">
             🤖 Chatbot
