@@ -3,8 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import * as XLSX from 'xlsx';
 import { EmployeeService } from '../../../core/services/employee.service';
-// ✅ Import depuis employee.model et non user.model
-import { Employee } from '../../../core/models/employee.model';
+import { Employee, EquipmentHistory } from '../../../core/models/employee.model';
 
 @Component({
   selector: 'app-employee-list',
@@ -45,13 +44,10 @@ import { Employee } from '../../../core/models/employee.model';
           </thead>
           <tbody>
             <tr *ngFor="let employee of employees">
-              <!-- ✅ Utilise employee.name et non employee.full_name -->
               <td><strong>{{ employee.name }}</strong></td>
               <td>{{ employee.email }}</td>
               <td>
-                <span class="badge badge-info" *ngIf="employee.cuid">
-                  {{ employee.cuid }}
-                </span>
+                <span class="badge badge-info" *ngIf="employee.cuid">{{ employee.cuid }}</span>
                 <span class="text-muted" *ngIf="!employee.cuid">-</span>
               </td>
               <td>
@@ -67,6 +63,11 @@ import { Employee } from '../../../core/models/employee.model';
               </td>
               <td>
                 <div class="action-buttons">
+                  <!-- ✅ Bouton Historique -->
+                  <button class="btn btn-sm btn-history"
+                          (click)="viewHistory(employee)">
+                    📋 Historique
+                  </button>
                   <button class="btn btn-sm btn-info"
                           (click)="editEmployee(employee.id!)">
                     ✏️ Modifier
@@ -83,6 +84,73 @@ import { Employee } from '../../../core/models/employee.model';
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- ✅ Modal Historique -->
+    <div class="modal-overlay" *ngIf="showHistoryModal" (click)="closeHistory()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>📋 Historique des équipements</h2>
+          <div class="employee-info" *ngIf="selectedEmployee">
+            <span class="badge badge-info">{{ selectedEmployee.name }}</span>
+            <span class="badge badge-primary">{{ selectedEmployee.department }}</span>
+          </div>
+          <button class="btn-close" (click)="closeHistory()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Chargement -->
+          <div class="loading" *ngIf="loadingHistory">
+            ⏳ Chargement de l'historique...
+          </div>
+
+          <!-- Aucun historique -->
+          <div class="no-data" *ngIf="!loadingHistory && history.length === 0">
+            📭 Aucun équipement attribué à cet employé
+          </div>
+
+          <!-- Tableau historique -->
+          <table class="table" *ngIf="!loadingHistory && history.length > 0">
+            <thead>
+              <tr>
+                <th>Équipement</th>
+                <th>Modèle</th>
+                <th>Type</th>
+                <th>Attribué le</th>
+                <th>Restitué le</th>
+                <th>Statut</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let h of history">
+                <td>
+                  <code>{{ h.equipment_serial || '-' }}</code>
+                </td>
+                <td>{{ h.equipment_model || '-' }}</td>
+                <td>
+                  <span class="badge badge-info">
+                    {{ h.equipment_type || '-' }}
+                  </span>
+                </td>
+                <td>{{ formatDate(h.assigned_at) }}</td>
+                <td>{{ h.returned_at ? formatDate(h.returned_at) : '-' }}</td>
+                <td>
+                  <span class="badge"
+                    [ngClass]="h.returned_at ? 'badge-secondary' : 'badge-success'">
+                    {{ h.returned_at ? '✅ Restitué' : '🟢 En cours' }}
+                  </span>
+                </td>
+                <td>{{ h.notes || '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeHistory()">Fermer</button>
+        </div>
       </div>
     </div>
   `,
@@ -112,14 +180,14 @@ import { Employee } from '../../../core/models/employee.model';
       padding: 4px 10px; border-radius: 12px;
       font-size: 0.8rem; font-weight: 500;
     }
-    .badge-info     { background: #e3f2fd; color: #1565c0; }
-    .badge-primary  { background: #ede7f6; color: #4527a0; }
-    .badge-success  { background: #e8f5e9; color: #2e7d32; }
-    .badge-warning  { background: #fff8e1; color: #f57f17; }
-    .badge-danger   { background: #ffebee; color: #c62828; }
-    .badge-secondary{ background: #f5f5f5; color: #616161; }
+    .badge-info      { background: #e3f2fd; color: #1565c0; }
+    .badge-primary   { background: #ede7f6; color: #4527a0; }
+    .badge-success   { background: #e8f5e9; color: #2e7d32; }
+    .badge-warning   { background: #fff8e1; color: #f57f17; }
+    .badge-danger    { background: #ffebee; color: #c62828; }
+    .badge-secondary { background: #f5f5f5; color: #616161; }
 
-    .action-buttons { display: flex; gap: 6px; }
+    .action-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
     .btn {
       padding: 8px 16px; border: none; border-radius: 6px;
       cursor: pointer; font-size: 0.9rem; font-weight: 500;
@@ -128,18 +196,70 @@ import { Employee } from '../../../core/models/employee.model';
     .btn-secondary { background: #6c757d; color: white; }
     .btn-info      { background: #17a2b8; color: white; }
     .btn-danger    { background: #dc3545; color: white; }
+    .btn-history   { background: #fd7e14; color: white; }
     .btn-sm        { padding: 5px 10px; font-size: 0.8rem; }
     .btn:hover     { opacity: 0.85; }
 
     .text-muted { color: #999; }
     .no-data { text-align: center; padding: 40px; color: #999; }
+    .loading { text-align: center; padding: 40px; color: #667eea; font-size: 1.1rem; }
     .alert { padding: 1rem; border-radius: 6px; margin-bottom: 1rem; }
     .alert-danger { background: #f8d7da; color: #721c24; }
+
+    /* ✅ Modal styles */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex; align-items: center;
+      justify-content: center; z-index: 1000;
+    }
+    .modal-content {
+      background: white; border-radius: 12px;
+      width: 90%; max-width: 900px;
+      max-height: 80vh; display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .modal-header {
+      display: flex; align-items: center;
+      gap: 1rem; padding: 1.5rem;
+      border-bottom: 1px solid #eee;
+      flex-wrap: wrap;
+    }
+    .modal-header h2 { margin: 0; flex: 1; color: #2c3e50; }
+    .employee-info { display: flex; gap: 0.5rem; }
+    .btn-close {
+      background: none; border: none;
+      font-size: 1.2rem; cursor: pointer;
+      color: #999; padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .btn-close:hover { background: #f0f0f0; color: #333; }
+    .modal-body {
+      padding: 1.5rem; overflow-y: auto; flex: 1;
+    }
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #eee;
+      display: flex; justify-content: flex-end;
+    }
+    code {
+      background: #f4f4f4; padding: 2px 6px;
+      border-radius: 4px; font-size: 0.85rem;
+      color: #e83e8c;
+    }
   `]
 })
 export class EmployeeListComponent implements OnInit {
   employees: Employee[] = [];
   error = '';
+
+  // ✅ Historique
+  showHistoryModal = false;
+  selectedEmployee: Employee | null = null;
+  history: EquipmentHistory[] = [];
+  loadingHistory = false;
 
   constructor(
     private employeeService: EmployeeService,
@@ -151,13 +271,46 @@ export class EmployeeListComponent implements OnInit {
   }
 
   loadEmployees(): void {
-    // ✅ Appel correct avec (skip, limit)
     this.employeeService.getEmployees(0, 100).subscribe({
       next: (data) => { this.employees = data; },
       error: (err) => {
         this.error = 'Erreur lors du chargement des employés';
         console.error(err);
       }
+    });
+  }
+
+  // ✅ Ouvrir le modal historique
+  viewHistory(employee: Employee): void {
+    this.selectedEmployee = employee;
+    this.showHistoryModal = true;
+    this.loadingHistory = true;
+    this.history = [];
+
+    this.employeeService.getEmployeeHistory(employee.id!).subscribe({
+      next: (data) => {
+        this.history = data;
+        this.loadingHistory = false;
+      },
+      error: () => {
+        this.loadingHistory = false;
+        this.error = 'Erreur lors du chargement de l\'historique';
+      }
+    });
+  }
+
+  // ✅ Fermer le modal
+  closeHistory(): void {
+    this.showHistoryModal = false;
+    this.selectedEmployee = null;
+    this.history = [];
+  }
+
+  // ✅ Formater les dates
+  formatDate(dateStr: string): string {
+    if (!dateStr) return '-';
+    return new Date(dateStr).toLocaleDateString('fr-FR', {
+      day: '2-digit', month: '2-digit', year: 'numeric'
     });
   }
 
@@ -173,7 +326,6 @@ export class EmployeeListComponent implements OnInit {
     }
   }
 
-  // ✅ Badge selon le type de contrat
   getContractBadge(contractType: string | undefined): string {
     const badges: Record<string, string> = {
       'CDI': 'badge-success',
@@ -210,7 +362,6 @@ export class EmployeeListComponent implements OnInit {
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const jsonData: any[] = XLSX.utils.sheet_to_json(sheet);
 
-        // ✅ Mapping avec le bon champ "name"
         const employees: Employee[] = jsonData.map(row => ({
           name: row['Nom complet'] || row['name'] || '',
           email: row['Email'] || row['email'] || '',

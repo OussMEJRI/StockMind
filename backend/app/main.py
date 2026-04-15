@@ -6,7 +6,7 @@ from app.api.v1.api import api_router
 import logging
 
 # ✅ Import des modèles AVANT tout le reste
-from app.models import User, Employee, Equipment, Emplacement, EquipmentMovement
+from app.models import User, Employee, Equipment, Emplacement, EquipmentMovement, EmployeeEquipmentHistory
 
 # ✅ Configuration du logging
 logging.basicConfig(level=logging.INFO)

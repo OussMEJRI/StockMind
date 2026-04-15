@@ -40,13 +40,14 @@ class Equipment(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
 
-    # ✅ emplacement_id + ForeignKey vers "emplacements.id"
+    # FK vers Emplacement
     emplacement_id = Column(Integer, ForeignKey("emplacements.id"), nullable=True)
     emplacement = relationship("Emplacement", back_populates="equipments")
 
-    # ✅ FK vers Employee
+    # FK vers Employee
     employee_id = Column(Integer, ForeignKey("employees.id"), nullable=True)
     employee = relationship("Employee", back_populates="equipments")
 
-    # ✅ Relation vers les mouvements
+    # Relations mouvements et historique
     movements = relationship("EquipmentMovement", back_populates="equipment")
+    assignment_history = relationship("EmployeeEquipmentHistory", back_populates="equipment")

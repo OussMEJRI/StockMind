@@ -16,5 +16,6 @@ class Employee(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    # ✅ Relations
+    # Relations
     equipments = relationship("Equipment", back_populates="employee")
+    equipment_history = relationship("EmployeeEquipmentHistory", back_populates="employee")

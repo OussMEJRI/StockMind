@@ -27,6 +27,20 @@ export interface Employee {
   department?: Department | string;
 }
 
+// ✅ Nouveau modèle historique
+export interface EquipmentHistory {
+  id: number;
+  employee_id: number;
+  equipment_id: number;
+  assigned_at: string;
+  returned_at: string | null;
+  notes: string | null;
+  created_at: string;
+  equipment_serial: string | null;
+  equipment_model: string | null;
+  equipment_type: string | null;
+}
+
 export const DepartmentLabels: Record<Department, string> = {
   [Department.BLI]: 'BLI',
   [Department.CCI]: 'CCI',
