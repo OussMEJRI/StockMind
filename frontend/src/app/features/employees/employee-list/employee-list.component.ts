@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { EmployeeService } from '../../../core/services/employee.service';
-import { Employee } from '../../../core/models/user.model';
 import { CommonModule } from '@angular/common';
 import * as XLSX from 'xlsx';
+import { EmployeeService } from '../../../core/services/employee.service';
+// ✅ Import depuis employee.model et non user.model
+import { Employee } from '../../../core/models/employee.model';
 
 @Component({
   selector: 'app-employee-list',
@@ -14,222 +15,131 @@ import * as XLSX from 'xlsx';
       <div class="page-header">
         <h1>👥 Employés</h1>
         <div class="header-actions">
-          <button class="btn-secondary" (click)="fileInput.click()">
+          <button class="btn btn-secondary" (click)="fileInput.click()">
             📊 Importer Excel
           </button>
-          <input #fileInput type="file" accept=".xlsx,.xls" (change)="onFileSelected($event)" style="display: none">
-          <button class="btn-secondary" (click)="downloadTemplate()">
-            📥 Télécharger modèle
+          <input #fileInput type="file" accept=".xlsx,.xls"
+                 (change)="onFileSelected($event)" style="display:none">
+          <button class="btn btn-secondary" (click)="downloadTemplate()">
+            📥 Modèle Excel
           </button>
-          <button class="btn-primary" (click)="addEmployee()">
-            + Nouvel employé
+          <button class="btn btn-primary" (click)="addEmployee()">
+            ➕ Nouvel employé
           </button>
         </div>
       </div>
 
-      <div class="alert alert-danger" *ngIf="error">
-        {{ error }}
-      </div>
+      <div class="alert alert-danger" *ngIf="error">{{ error }}</div>
 
-      <div class="card">
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Nom</th>
-                  <th>Email</th>
-                  <th>CUID</th>
-                  <th>Type de contrat</th>
-                  <th>Département</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let employee of employees">
-                  <td>{{ employee.name }}</td>
-                  <td>{{ employee.email }}</td>
-                  <td>
-                    <span class="badge badge-info" *ngIf="employee.cuid">
-                      {{ employee.cuid }}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="badge badge-success" *ngIf="employee.contract_type">
-                      {{ employee.contract_type }}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="badge badge-primary" *ngIf="employee.department">
-                      {{ employee.department }}
-                    </span>
-                  </td>
-                  <td>
-                    <button class="btn-sm btn-secondary" (click)="editEmployee(employee.id!)">
-                      Modifier
-                    </button>
-                    <button class="btn-sm btn-danger" (click)="deleteEmployee(employee.id!)">
-                      Supprimer
-                    </button>
-                  </td>
-                </tr>
-                <tr *ngIf="employees.length === 0">
-                  <td colspan="6" class="text-center">Aucun employé trouvé</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+      <div class="table-card">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Email</th>
+              <th>CUID</th>
+              <th>Contrat</th>
+              <th>Département</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let employee of employees">
+              <!-- ✅ Utilise employee.name et non employee.full_name -->
+              <td><strong>{{ employee.name }}</strong></td>
+              <td>{{ employee.email }}</td>
+              <td>
+                <span class="badge badge-info" *ngIf="employee.cuid">
+                  {{ employee.cuid }}
+                </span>
+                <span class="text-muted" *ngIf="!employee.cuid">-</span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getContractBadge(employee.contract_type)"
+                      *ngIf="employee.contract_type">
+                  {{ employee.contract_type }}
+                </span>
+              </td>
+              <td>
+                <span class="badge badge-primary" *ngIf="employee.department">
+                  {{ employee.department }}
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-info"
+                          (click)="editEmployee(employee.id!)">
+                    ✏️ Modifier
+                  </button>
+                  <button class="btn btn-sm btn-danger"
+                          (click)="deleteEmployee(employee.id!)">
+                    🗑️ Supprimer
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="employees.length === 0">
+              <td colspan="6" class="no-data">Aucun employé trouvé</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   `,
   styles: [`
-    .page-container {
-      padding: 2rem;
-    }
-
+    .page-container { padding: 2rem; max-width: 1400px; margin: 0 auto; }
     .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 1.5rem;
     }
+    .page-header h1 { margin: 0; color: #2c3e50; }
+    .header-actions { display: flex; gap: 1rem; }
 
-    .page-header h1 {
-      margin: 0;
-      color: #2c3e50;
+    .table-card {
+      background: white; border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;
     }
-
-    .header-actions {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .card {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .card-body {
-      padding: 1.5rem;
-    }
-
-    .table-responsive {
-      overflow-x: auto;
-    }
-
-    .table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .table th,
-    .table td {
-      padding: 1rem;
-      text-align: left;
-      border-bottom: 1px solid #e9ecef;
-    }
-
+    .table { width: 100%; border-collapse: collapse; }
     .table th {
-      background-color: #f8f9fa;
-      font-weight: 600;
-      color: #495057;
+      padding: 12px 16px; background: #f8f9fa;
+      font-weight: 600; color: #555;
+      border-bottom: 2px solid #dee2e6; text-align: left;
     }
-
-    .table tbody tr:hover {
-      background-color: #f8f9fa;
-    }
-
-    .btn-primary {
-      background-color: #667eea;
-      color: white;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-
-    .btn-primary:hover {
-      background-color: #5568d3;
-    }
-
-    .btn-secondary {
-      background-color: #6c757d;
-      color: white;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-
-    .btn-secondary:hover {
-      background-color: #5a6268;
-    }
-
-    .btn-sm {
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.875rem;
-      margin-right: 0.5rem;
-    }
-
-    .btn-danger {
-      background-color: #dc3545;
-      color: white;
-    }
-
-    .btn-danger:hover {
-      background-color: #c82333;
-    }
+    .table td { padding: 12px 16px; border-bottom: 1px solid #eee; }
+    .table tbody tr:hover { background: #f9f9f9; }
 
     .badge {
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
-      font-size: 0.875rem;
-      font-weight: 500;
+      padding: 4px 10px; border-radius: 12px;
+      font-size: 0.8rem; font-weight: 500;
     }
+    .badge-info     { background: #e3f2fd; color: #1565c0; }
+    .badge-primary  { background: #ede7f6; color: #4527a0; }
+    .badge-success  { background: #e8f5e9; color: #2e7d32; }
+    .badge-warning  { background: #fff8e1; color: #f57f17; }
+    .badge-danger   { background: #ffebee; color: #c62828; }
+    .badge-secondary{ background: #f5f5f5; color: #616161; }
 
-    .badge-info {
-      background-color: #e3f2fd;
-      color: #1976d2;
+    .action-buttons { display: flex; gap: 6px; }
+    .btn {
+      padding: 8px 16px; border: none; border-radius: 6px;
+      cursor: pointer; font-size: 0.9rem; font-weight: 500;
     }
+    .btn-primary   { background: #667eea; color: white; }
+    .btn-secondary { background: #6c757d; color: white; }
+    .btn-info      { background: #17a2b8; color: white; }
+    .btn-danger    { background: #dc3545; color: white; }
+    .btn-sm        { padding: 5px 10px; font-size: 0.8rem; }
+    .btn:hover     { opacity: 0.85; }
 
-    .badge-success {
-      background-color: #e8f5e9;
-      color: #388e3c;
-    }
-
-    .badge-primary {
-      background-color: #e3f2fd;
-      color: #1976d2;
-    }
-
-    .text-center {
-      text-align: center;
-    }
-
-    .alert {
-      padding: 1rem;
-      border-radius: 6px;
-      margin-bottom: 1rem;
-    }
-
-    .alert-danger {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
+    .text-muted { color: #999; }
+    .no-data { text-align: center; padding: 40px; color: #999; }
+    .alert { padding: 1rem; border-radius: 6px; margin-bottom: 1rem; }
+    .alert-danger { background: #f8d7da; color: #721c24; }
   `]
 })
 export class EmployeeListComponent implements OnInit {
   employees: Employee[] = [];
-  error: string = '';
-  selectedFile: File | null = null;
+  error = '';
 
   constructor(
     private employeeService: EmployeeService,
@@ -241,10 +151,9 @@ export class EmployeeListComponent implements OnInit {
   }
 
   loadEmployees(): void {
-    this.employeeService.getEmployees().subscribe({
-      next: (data) => {
-        this.employees = data;
-      },
+    // ✅ Appel correct avec (skip, limit)
+    this.employeeService.getEmployees(0, 100).subscribe({
+      next: (data) => { this.employees = data; },
       error: (err) => {
         this.error = 'Erreur lors du chargement des employés';
         console.error(err);
@@ -252,115 +161,92 @@ export class EmployeeListComponent implements OnInit {
     });
   }
 
-  addEmployee(): void {
-    this.router.navigate(['/employees/new']);
-  }
-
-  editEmployee(id: number): void {
-    this.router.navigate(['/employees/edit', id]);
-  }
+  addEmployee(): void { this.router.navigate(['/employees/new']); }
+  editEmployee(id: number): void { this.router.navigate(['/employees/edit', id]); }
 
   deleteEmployee(id: number): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer cet employé ?')) {
       this.employeeService.deleteEmployee(id).subscribe({
-        next: () => {
-          this.loadEmployees();
-        },
-        error: (err) => {
-          this.error = 'Erreur lors de la suppression';
-          console.error(err);
-        }
+        next: () => this.loadEmployees(),
+        error: () => { this.error = 'Erreur lors de la suppression'; }
       });
     }
   }
 
-  onFileSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedFile = file;
-      this.importFile();
-    }
+  // ✅ Badge selon le type de contrat
+  getContractBadge(contractType: string | undefined): string {
+    const badges: Record<string, string> = {
+      'CDI': 'badge-success',
+      'CDD': 'badge-warning',
+      'STAGIAIRE': 'badge-info',
+      'EXTERNE': 'badge-secondary'
+    };
+    return badges[contractType || ''] || 'badge-secondary';
   }
 
   downloadTemplate(): void {
-    // Créer un modèle Excel avec les colonnes attendues
-    const template = [
-      {
-        'Nom complet': 'Jean Dupont',
-        'Email': 'jean.dupont@example.com',
-        'CUID': 'CMCX1234',
-        'Type de contrat': 'CDI',
-        'Département': 'SUPPORT'
-      }
-    ];
-
+    const template = [{
+      'Nom complet': 'Jean Dupont',
+      'Email': 'jean.dupont@sofrecom.com',
+      'CUID': 'JDUP1234',
+      'Type de contrat': 'CDI',
+      'Département': 'SUPPORT'
+    }];
     const ws = XLSX.utils.json_to_sheet(template);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Employés');
     XLSX.writeFile(wb, 'modele_employes.xlsx');
   }
 
-  importFile(): void {
-    if (!this.selectedFile) {
-      this.error = 'Veuillez sélectionner un fichier';
-      return;
-    }
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (!file) return;
 
     const reader = new FileReader();
     reader.onload = (e: any) => {
       try {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData: any[] = XLSX.utils.sheet_to_json(sheet);
 
-        // Transformer les données Excel en format Employee
-        const employees: Partial<Employee>[] = jsonData.map((row: any) => ({
-          name: row['Nom complet'] || row['name'],
-          email: row['Email'] || row['email'],
-          cuid: row['CUID'] || row['cuid'],
-          contract_type: row['Type de contrat'] || row['contract_type'],
-          department: row['Département'] || row['department']
+        // ✅ Mapping avec le bon champ "name"
+        const employees: Employee[] = jsonData.map(row => ({
+          name: row['Nom complet'] || row['name'] || '',
+          email: row['Email'] || row['email'] || '',
+          cuid: row['CUID'] || row['cuid'] || undefined,
+          contract_type: row['Type de contrat'] || row['contract_type'] || undefined,
+          department: row['Département'] || row['department'] || undefined
         }));
 
-        // Importer chaque employé
-        let successCount = 0;
-        let errorCount = 0;
+        let success = 0;
+        let errors = 0;
 
-        employees.forEach((emp, index) => {
-          this.employeeService.createEmployee(emp as Employee).subscribe({
+        employees.forEach((emp, i) => {
+          this.employeeService.createEmployee(emp).subscribe({
             next: () => {
-              successCount++;
-              if (index === employees.length - 1) {
-                this.showImportResult(successCount, errorCount);
-              }
+              success++;
+              if (i === employees.length - 1) this.showResult(success, errors);
             },
-            error: (err) => {
-              errorCount++;
-              console.error('Erreur import:', err);
-              if (index === employees.length - 1) {
-                this.showImportResult(successCount, errorCount);
-              }
+            error: () => {
+              errors++;
+              if (i === employees.length - 1) this.showResult(success, errors);
             }
           });
         });
-
-      } catch (error) {
+      } catch {
         this.error = 'Erreur lors de la lecture du fichier Excel';
-        console.error(error);
       }
     };
-
-    reader.readAsArrayBuffer(this.selectedFile);
+    reader.readAsArrayBuffer(file);
   }
 
-  private showImportResult(success: number, errors: number): void {
+  private showResult(success: number, errors: number): void {
     if (errors === 0) {
       alert(`✅ ${success} employé(s) importé(s) avec succès !`);
     } else {
       alert(`⚠️ ${success} importé(s), ${errors} erreur(s)`);
     }
     this.loadEmployees();
-    this.selectedFile = null;
   }
 }

@@ -5,6 +5,17 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
+// ✅ Angular Material
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
@@ -12,27 +23,27 @@ import { AppComponent } from './app.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { ErrorInterceptor } from './core/interceptors/error.interceptor';
 
-// Components
+// Composants NON standalone
 import { LoginComponent } from './features/auth/login/login.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
-import { EquipmentListComponent } from './features/equipment/equipment-list/equipment-list.component';
-import { EquipmentFormComponent } from './features/equipment/equipment-form/equipment-form.component';
-import { EmployeeListComponent } from './features/employees/employee-list/employee-list.component';
-import { EmployeeFormComponent } from './features/employees/employee-form/employee-form.component';
-import { LocationListComponent } from './features/locations/location-list/location-list.component';
-import { LocationFormComponent } from './features/locations/location-form/location-form.component';
+import { EmplacementListComponent } from './features/emplacements/emplacement-list.component';
+import { EmplacementFormComponent } from './features/emplacements/emplacement-form.component';
 import { ChatbotComponent } from './features/chatbot/chatbot.component';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
+
+// Composants standalone
+import { EmployeeListComponent } from './features/employees/employee-list/employee-list.component';
+import { EmployeeFormComponent } from './features/employees/employee-form/employee-form.component';
+import { EquipmentListComponent } from './features/equipment/equipment-list/equipment-list.component';
+import { EquipmentFormComponent } from './features/equipment/equipment-form/equipment-form.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
     DashboardComponent,
-    EquipmentListComponent,
-    EquipmentFormComponent,
-    LocationListComponent,
-    LocationFormComponent,
+    EmplacementListComponent,
+    EmplacementFormComponent,
     ChatbotComponent,
     NavbarComponent
   ],
@@ -44,9 +55,21 @@ import { NavbarComponent } from './shared/components/navbar/navbar.component';
     FormsModule,
     ReactiveFormsModule,
     AppRoutingModule,
+    // ✅ Angular Material
+    MatTableModule,
+    MatPaginatorModule,
+    MatIconModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
     // Composants standalone
     EmployeeListComponent,
-    EmployeeFormComponent
+    EmployeeFormComponent,
+    EquipmentListComponent,
+    EquipmentFormComponent
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

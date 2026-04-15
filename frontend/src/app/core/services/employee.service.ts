@@ -1,18 +1,20 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Employee, EmployeeResponse } from '../models/employee.model';
+import { Employee } from '../models/employee.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EmployeeService {
-  private apiUrl = `${environment.apiUrl}/employees`;
+  // ✅ URL corrigée
+  private apiUrl = `${environment.apiUrl}/api/v1/employees`;
 
   constructor(private http: HttpClient) {}
 
-  getEmployees(skip: number = 0, limit: number = 100, filters?: any): Observable<EmployeeResponse> {
+  // ✅ Retourne un tableau directement comme le backend
+  getEmployees(skip: number = 0, limit: number = 100, filters?: any): Observable<Employee[]> {
     let params = new HttpParams()
       .set('skip', skip.toString())
       .set('limit', limit.toString());
@@ -26,7 +28,7 @@ export class EmployeeService {
       }
     }
 
-    return this.http.get<EmployeeResponse>(this.apiUrl, { params });
+    return this.http.get<Employee[]>(this.apiUrl, { params });
   }
 
   getEmployeeById(id: number): Observable<Employee> {
@@ -37,17 +39,11 @@ export class EmployeeService {
     return this.http.post<Employee>(this.apiUrl, employee);
   }
 
-  updateEmployee(id: number, employee: Employee): Observable<Employee> {
+  updateEmployee(id: number, employee: Partial<Employee>): Observable<Employee> {
     return this.http.put<Employee>(`${this.apiUrl}/${id}`, employee);
   }
 
   deleteEmployee(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
-
-  exportEmployees(format: string = 'csv'): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/export?format=${format}`, {
-      responseType: 'blob'
-    });
   }
 }

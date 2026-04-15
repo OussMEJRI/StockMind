@@ -1,0 +1,67 @@
+<div class="container">
+  <div class="header">
+    <h1>{{ isEditMode ? '✏️ Modifier' : '➕ Nouvel' }} Emplacement</h1>
+  </div>
+
+  <div *ngIf="loading" class="loading">Chargement...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="!loading">
+    <div class="form-grid">
+
+      <!-- Site -->
+      <div class="form-group">
+        <label>Site <span class="required">*</span></label>
+        <select formControlName="site" [class.invalid]="isInvalid('site')">
+          <option value="">Sélectionner un site</option>
+          <option *ngFor="let site of sites" [value]="site">{{ site }}</option>
+        </select>
+        <div class="error-msg" *ngIf="isInvalid('site')">
+          Le site est obligatoire
+        </div>
+      </div>
+
+      <!-- Étage -->
+      <div class="form-group">
+        <label>Étage <span class="required">*</span></label>
+        <select formControlName="etage" [class.invalid]="isInvalid('etage')">
+          <option value="">Sélectionner un étage</option>
+          <option *ngFor="let etage of etages" [value]="etage">{{ etage }}</option>
+        </select>
+        <div class="error-msg" *ngIf="isInvalid('etage')">
+          L'étage est obligatoire
+        </div>
+      </div>
+
+      <!-- Rosace -->
+      <div class="form-group">
+        <label>Rosace <span class="required">*</span></label>
+        <select formControlName="rosace" [class.invalid]="isInvalid('rosace')">
+          <option value="">Sélectionner une rosace</option>
+          <option *ngFor="let r of rosaces" [value]="r">Rosace {{ r }}</option>
+        </select>
+        <div class="error-msg" *ngIf="isInvalid('rosace')">
+          La rosace est obligatoire
+        </div>
+      </div>
+
+      <!-- Position exacte (auto-générée) -->
+      <div class="form-group full-width">
+        <label>Position exacte</label>
+        <input type="text" formControlName="exact_position" readonly
+               placeholder="Générée automatiquement">
+        <small>Format : Site - Étage - Rosace X</small>
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="cancel()">
+        Annuler
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="loading || form.invalid">
+        {{ isEditMode ? 'Modifier' : 'Créer' }}
+      </button>
+    </div>
+  </form>
+</div>

@@ -13,6 +13,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login
 
 
 def get_db() -> Generator:
+    """Dependency unique pour obtenir une session de base de données"""
     db = SessionLocal()
     try:
         yield db

@@ -1,6 +1,10 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { ChatbotService, ChatMessage } from '../../core/services/chatbot.service';
+import { forkJoin } from 'rxjs';
+import { ChatbotService, Message } from '../../core/services/chatbot.service';
+import { EquipmentService } from '../../core/services/equipment.service';
+import { EmployeeService } from '../../core/services/employee.service';
+import { EmplacementService } from '../../core/services/emplacement.service';
 
 @Component({
   selector: 'app-chatbot',
@@ -10,18 +14,26 @@ import { ChatbotService, ChatMessage } from '../../core/services/chatbot.service
 export class ChatbotComponent implements OnInit, AfterViewChecked {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
-  messages: ChatMessage[] = [];
-  userInput: string = '';
-  loading: boolean = false;
-  dataLoaded: boolean = false;
+  messages: Message[] = [];
+  userInput = '';
+  loading = false;
+  dataLoaded = false;
 
   constructor(
     private chatbotService: ChatbotService,
+    private equipmentService: EquipmentService,
+    private employeeService: EmployeeService,
+    private emplacementService: EmplacementService,
     private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
-    this.addBotMessage("Bonjour ! 👋 Je charge les données de l'inventaire...");
+    // ✅ S'abonner au flux de messages du service
+    this.chatbotService.messages$.subscribe(msgs => {
+      this.messages = msgs;
+    });
+
+    // ✅ Charger les données
     this.loadData();
   }
 
@@ -31,77 +43,68 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
 
   loadData(): void {
     this.loading = true;
-    this.chatbotService.loadAppData().subscribe({
-      next: (data) => {
+
+    // ✅ Chargement parallèle avec forkJoin
+    forkJoin({
+      equipment: this.equipmentService.getEquipment(0, 100),
+      employees: this.employeeService.getEmployees(0, 100),
+      emplacements: this.emplacementService.getEmplacements(0, 100)
+    }).subscribe({
+      next: ({ equipment, employees, emplacements }) => {
+        // ✅ Appel correct - loadAppData n'est pas un Observable
+        this.chatbotService.loadAppData(equipment, employees, emplacements);
         this.dataLoaded = true;
         this.loading = false;
+
+        // ✅ Message de bienvenue avec les vraies données
+        this.chatbotService.clearMessages();
         this.addBotMessage(
-          `✅ Données chargées avec succès !\n\n` +
-          `📊 **Résumé :**\n` +
-          `• ${data.equipment.length} équipements\n` +
-          `• ${data.employeesCount} employés\n` +
-          `• ${data.locationsCount} emplacements\n\n` +
-          `Que souhaitez-vous savoir ? (Tapez "aide" pour voir les commandes)`
+          `✅ Données chargées !\n\n` +
+          `📊 Résumé de l'inventaire :\n` +
+          `• ${equipment.length} équipements\n` +
+          `• ${employees.length} employés\n` +
+          `• ${emplacements.length} emplacements\n\n` +
+          `Tapez "aide" pour voir ce que je peux faire.`
         );
       },
-      error: (error) => {
+      error: (err) => {
         this.loading = false;
-        this.addBotMessage("❌ Erreur lors du chargement des données. Veuillez réessayer.");
-        console.error('Error loading data:', error);
+        this.addBotMessage(
+          "❌ Erreur lors du chargement des données. Veuillez réessayer."
+        );
+        console.error('Erreur chargement données chatbot:', err);
       }
     });
   }
 
   sendMessage(): void {
-    if (!this.userInput.trim()) {
-      return;
-    }
+    const message = this.userInput.trim();
+    if (!message) return;
 
-    // Ajouter le message de l'utilisateur
-    this.addUserMessage(this.userInput);
-
-    // Traiter le message
-    const response = this.chatbotService.processMessage(this.userInput);
-    
-    // Ajouter la réponse du bot
-    setTimeout(() => {
-      this.addBotMessage(response);
-    }, 500);
-
-    // Réinitialiser l'input
     this.userInput = '';
+    // ✅ sendMessage gère tout en interne (user + bot)
+    this.chatbotService.sendMessage(message);
   }
 
-  addUserMessage(text: string): void {
-    this.messages.push({
-      text,
-      isUser: true,
-      timestamp: new Date()
-    });
-  }
-
-  addBotMessage(text: string): void {
-    this.messages.push({
-      text,
-      isUser: false,
-      timestamp: new Date()
-    });
+  // ✅ Méthode locale pour ajouter un message bot directement
+  private addBotMessage(text: string): void {
+    const messages = [...this.chatbotService['messagesSubject'].value];
+    messages.push({ text, isUser: false, timestamp: new Date() });
+    this.chatbotService['messagesSubject'].next(messages);
   }
 
   formatMessage(text: string): SafeHtml {
-    // Convertir le markdown simple en HTML
-    let formatted = text
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // **texte** -> <strong>
-      .replace(/\n/g, '<br>'); // Sauts de ligne
-
-    return this.sanitizer.sanitize(1, formatted) || '';
+    const formatted = text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>');
+    return this.sanitizer.bypassSecurityTrustHtml(formatted);
   }
 
   scrollToBottom(): void {
     try {
-      this.messagesContainer.nativeElement.scrollTop = 
-        this.messagesContainer.nativeElement.scrollHeight;
-    } catch(err) { }
+      const el = this.messagesContainer.nativeElement;
+      el.scrollTop = el.scrollHeight;
+    } catch (e) {}
   }
 
   onKeyPress(event: KeyboardEvent): void {
@@ -112,8 +115,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
   }
 
   clearChat(): void {
-    this.messages = [];
-    this.addBotMessage("💬 Chat réinitialisé. Comment puis-je vous aider ?");
+    this.chatbotService.clearMessages();
   }
 
   refreshData(): void {

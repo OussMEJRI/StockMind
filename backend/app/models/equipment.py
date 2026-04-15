@@ -1,56 +1,52 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Enum as SQLEnum, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
-from datetime import datetime
-import enum
+from sqlalchemy.sql import func
 from app.db.session import Base
+import enum
 
 
 class EquipmentType(str, enum.Enum):
-    """Types of IT equipment."""
-    PC = "pc"
     LAPTOP = "laptop"
+    PC = "pc"
     MONITOR = "monitor"
     PHONE = "phone"
-    ACCESSORY = "accessory"
+    PRINTER = "printer"
+    OTHER = "other"
 
 
 class EquipmentCondition(str, enum.Enum):
-    """Condition status of equipment."""
     NEW = "new"
-    USED = "used"
-    OUT_OF_SERVICE = "out_of_service"
+    GOOD = "good"
+    FAIR = "fair"
+    POOR = "poor"
 
 
 class EquipmentStatus(str, enum.Enum):
-    """Availability status of equipment."""
     IN_STOCK = "in_stock"
     ASSIGNED = "assigned"
+    MAINTENANCE = "maintenance"
+    RETIRED = "retired"
 
 
 class Equipment(Base):
-    """Equipment model for IT inventory items."""
     __tablename__ = "equipment"
-    
+
     id = Column(Integer, primary_key=True, index=True)
-    serial_number = Column(String, unique=True, index=True, nullable=False)
-    model = Column(String, nullable=False, index=True)
-    equipment_type = Column(SQLEnum(EquipmentType), nullable=False, index=True)
-    condition = Column(SQLEnum(EquipmentCondition), nullable=False, default=EquipmentCondition.NEW)
-    status = Column(SQLEnum(EquipmentStatus), nullable=False, default=EquipmentStatus.IN_STOCK, index=True)
-    
-    # Location information
-    location_id = Column(Integer, ForeignKey("locations.id"), nullable=True)
-    
-    # Assignment information
+    serial_number = Column(String(100), unique=True, nullable=False, index=True)
+    model = Column(String(255), nullable=False)
+    equipment_type = Column(String(50), nullable=False)
+    condition = Column(String(50), nullable=False)
+    status = Column(String(50), nullable=False, default="in_stock")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
+
+    # ✅ emplacement_id + ForeignKey vers "emplacements.id"
+    emplacement_id = Column(Integer, ForeignKey("emplacements.id"), nullable=True)
+    emplacement = relationship("Emplacement", back_populates="equipments")
+
+    # ✅ FK vers Employee
     employee_id = Column(Integer, ForeignKey("employees.id"), nullable=True)
-    assigned_to_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    
-    # Timestamps
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    # Relationships
-    location = relationship("Location", back_populates="equipment")
-    employee = relationship("Employee", back_populates="assigned_equipment")
-    assigned_employee = relationship("User", back_populates="equipment_assignments")
+    employee = relationship("Employee", back_populates="equipments")
+
+    # ✅ Relation vers les mouvements
     movements = relationship("EquipmentMovement", back_populates="equipment")

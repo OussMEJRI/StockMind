@@ -1,17 +1,13 @@
-from app.models.user import User, UserRole
+from app.models.user import User
 from app.models.employee import Employee
-from app.models.equipment import Equipment, EquipmentType, EquipmentCondition, EquipmentStatus
-from app.models.location import Location
+from app.models.equipment import Equipment
+from app.models.emplacements import Emplacement
 from app.models.movement import EquipmentMovement
 
 __all__ = [
     "User",
-    "UserRole",
     "Employee",
     "Equipment",
-    "EquipmentType",
-    "EquipmentCondition",
-    "EquipmentStatus",
-    "Location",
+    "Emplacement",
     "EquipmentMovement",
 ]

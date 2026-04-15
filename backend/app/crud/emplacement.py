@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
-from app.models.emplacement import Emplacement
+from app.models.emplacements import Emplacement
 from app.models.equipment import Equipment
-from app.schemas.emplacement import EmplacementCreate, EmplacementUpdate
+from app.schemas.emplacements import EmplacementCreate, EmplacementUpdate
 from typing import List, Optional
 
 def get_emplacement(db: Session, emplacement_id: int) -> Optional[Emplacement]:

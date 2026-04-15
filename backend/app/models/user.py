@@ -14,7 +14,7 @@ class UserRole(str, enum.Enum):
 class User(Base):
     """User model for authentication and authorization."""
     __tablename__ = "users"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
@@ -22,7 +22,7 @@ class User(Base):
     last_name = Column(String, nullable=False)
     role = Column(SQLEnum(UserRole), nullable=False, default=UserRole.COLLABORATEUR)
     is_active = Column(Boolean, default=True)
-    
-    # Relationships
-    equipment_assignments = relationship("Equipment", back_populates="assigned_employee")
+
+    # ✅ Suppression de equipment_assignments (pas de FK dans Equipment vers User)
+    # ✅ Uniquement la relation vers les mouvements
     movement_history = relationship("EquipmentMovement", back_populates="employee")

@@ -1,4 +1,24 @@
 /* Global Styles */
+/* ✅ Ajout au début du fichier */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  /* ✅ Police Inter ajoutée */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont,
+               'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: #f5f5f5;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* ✅ Ajout du padding-top pour la navbar fixe */
+app-root > * {
+  padding-top: 60px;
+}
 * {
   margin: 0;
   padding: 0;
@@ -381,3 +401,6 @@ select.form-control {
     overflow-x: auto;
   }
 }
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

@@ -1,4 +1,5 @@
 export const environment = {
   production: false,
-  apiUrl: '/api/v1'
+  // ✅ URL de base sans /api/v1 (les services l'ajoutent eux-mêmes)
+  apiUrl: ''
 };

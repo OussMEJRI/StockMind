@@ -11,7 +11,7 @@ import { User, LoginRequest, TokenResponse } from '../models/user.model';
 export class AuthService {
   private currentUserSubject: BehaviorSubject<User | null>;
   public currentUser: Observable<User | null>;
-  private apiUrl = `${environment.apiUrl}/auth`;
+  private apiUrl = `${environment.apiUrl}/api/v1/auth`;
 
   constructor(
     private http: HttpClient,

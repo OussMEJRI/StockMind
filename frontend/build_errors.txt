@@ -1,0 +1,409 @@
+- Generating browser application bundles (phase: setup)...
+✔ Browser application bundle generation complete.
+✔ Browser application bundle generation complete.
+
+Warning: /workspaces/StockMind/frontend/src/app/features/chatbot/chatbot.component.css exceeded maximum budget. Budget 2.00 kB was not met by 1.70 kB with a total of 3.70 kB.
+
+Warning: /workspaces/StockMind/frontend/src/app/features/equipment/equipment-list/equipment-list.component.ts-angular-inline--2.css exceeded maximum budget. Budget 2.00 kB was not met by 1.13 kB with a total of 3.13 kB.
+
+
+
+Error: src/app/core/models/employee.model.ts:1:2 - error TS1110: Type expected.
+
+1 </div>
+   ~
+
+
+Error: src/app/core/models/employee.model.ts:1:3 - error TS1161: Unterminated regular expression literal.
+
+1 </div>
+    
+
+
+Error: src/app/core/models/employee.model.ts:3:1 - error TS1185: Merge conflict marker encountered.
+
+3 ========== ./frontend/src/app/features/dashboard/dashboard.component.ts ==========
+  ~~~~~~~
+
+
+Error: src/app/core/services/chatbot.service.ts:6:26 - error TS2306: File '/workspaces/StockMind/frontend/src/app/core/models/employee.model.ts' is not a module.
+
+6 import { Employee } from '../models/employee.model';
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/core/services/employee.service.ts:4:26 - error TS2306: File '/workspaces/StockMind/frontend/src/app/core/models/employee.model.ts' is not a module.
+
+4 import { Employee } from '../models/employee.model';
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/features/chatbot/chatbot.component.ts:3:26 - error TS2305: Module '"../../core/services/chatbot.service"' has no exported member 'ChatMessage'.
+
+3 import { ChatbotService, ChatMessage } from '../../core/services/chatbot.service';
+                           ~~~~~~~~~~~
+
+
+Error: src/app/features/chatbot/chatbot.component.ts:34:25 - error TS2554: Expected 3 arguments, but got 0.
+
+34     this.chatbotService.loadAppData().subscribe({
+                           ~~~~~~~~~~~~~
+
+  src/app/core/services/chatbot.service.ts:36:5
+    36     equipment: Equipment[],
+           ~~~~~~~~~~~~~~~~~~~~~~
+    An argument for 'equipment' was not provided.
+
+
+Error: src/app/features/chatbot/chatbot.component.ts:34:39 - error TS2339: Property 'subscribe' does not exist on type 'void'.
+
+34     this.chatbotService.loadAppData().subscribe({
+                                         ~~~~~~~~~
+
+
+Error: src/app/features/chatbot/chatbot.component.ts:35:14 - error TS7006: Parameter 'data' implicitly has an 'any' type.
+
+35       next: (data) => {
+                ~~~~
+
+
+Error: src/app/features/chatbot/chatbot.component.ts:47:15 - error TS7006: Parameter 'error' implicitly has an 'any' type.
+
+47       error: (error) => {
+                 ~~~~~
+
+
+Error: src/app/features/chatbot/chatbot.component.ts:64:42 - error TS2341: Property 'processMessage' is private and only accessible within class 'ChatbotService'.
+
+64     const response = this.chatbotService.processMessage(this.userInput);
+                                            ~~~~~~~~~~~~~~
+
+
+Error: src/app/features/dashboard/dashboard.component.ts:8:26 - error TS2306: File '/workspaces/StockMind/frontend/src/app/core/models/employee.model.ts' is not a module.
+
+8 import { Employee } from '../../core/models/employee.model';
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:5:7 - error NG8001: 'mat-icon' is not a known element:
+1. If 'mat-icon' is an Angular component, then verify that it is part of this module.
+2. If 'mat-icon' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+5       <mat-icon>add</mat-icon>
+        ~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:12:5 - error NG8001: 'mat-form-field' is not a known element:
+1. If 'mat-form-field' is an Angular component, then verify that it is part of this module.
+2. If 'mat-form-field' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+12     <mat-form-field>
+       ~~~~~~~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:13:7 - error NG8001: 'mat-label' is not a known element:
+1. If 'mat-label' is an Angular component, then verify that it is part of this module.
+2. If 'mat-label' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+13       <mat-label>Rechercher</mat-label>
+         ~~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:19:5 - error NG8001: 'mat-form-field' is not a known element:
+1. If 'mat-form-field' is an Angular component, then verify that it is part of this module.
+2. If 'mat-form-field' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+19     <mat-form-field>
+       ~~~~~~~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:20:7 - error NG8001: 'mat-label' is not a known element:
+1. If 'mat-label' is an Angular component, then verify that it is part of this module.
+2. If 'mat-label' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+20       <mat-label>Site</mat-label>
+         ~~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:22:9 - error NG8001: 'mat-option' is not a known element:
+1. If 'mat-option' is an Angular component, then verify that it is part of this module.
+2. If 'mat-option' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+22         <mat-option value="">Tous</mat-option>
+           ~~~~~~~~~~~~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:23:9 - error NG8001: 'mat-option' is not a known element:
+1. If 'mat-option' is an Angular component, then verify that it is part of this module.
+2. If 'mat-option' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+23         <mat-option *ngFor="let site of sites" [value]="site">{{ site }}</mat-option>
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:23:48 - error NG8002: Can't bind to 'value' since it isn't a known property of 'mat-option'.
+1. If 'mat-option' is an Angular component and it has 'value' input, then verify that it is part of this module.
+2. If 'mat-option' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@NgModule.schemas' of this component.
+
+23         <mat-option *ngFor="let site of sites" [value]="site">{{ site }}</mat-option>
+                                                  ~~~~~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:27:5 - error NG8001: 'mat-form-field' is not a known element:
+1. If 'mat-form-field' is an Angular component, then verify that it is part of this module.
+2. If 'mat-form-field' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+27     <mat-form-field>
+       ~~~~~~~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:28:7 - error NG8001: 'mat-label' is not a known element:
+1. If 'mat-label' is an Angular component, then verify that it is part of this module.
+2. If 'mat-label' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+28       <mat-label>Étage</mat-label>
+         ~~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:30:9 - error NG8001: 'mat-option' is not a known element:
+1. If 'mat-option' is an Angular component, then verify that it is part of this module.
+2. If 'mat-option' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+30         <mat-option value="">Tous</mat-option>
+           ~~~~~~~~~~~~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:31:9 - error NG8001: 'mat-option' is not a known element:
+1. If 'mat-option' is an Angular component, then verify that it is part of this module.
+2. If 'mat-option' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+31         <mat-option *ngFor="let etage of etages" [value]="etage">{{ etage }}</mat-option>
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:31:50 - error NG8002: Can't bind to 'value' since it isn't a known property of 'mat-option'.
+1. If 'mat-option' is an Angular component and it has 'value' input, then verify that it is part of this module.
+2. If 'mat-option' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@NgModule.schemas' of this component.
+
+31         <mat-option *ngFor="let etage of etages" [value]="etage">{{ etage }}</mat-option>
+                                                    ~~~~~~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:36:7 - error NG8001: 'mat-icon' is not a known element:
+1. If 'mat-icon' is an Angular component, then verify that it is part of this module.
+2. If 'mat-icon' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+36       <mat-icon>clear</mat-icon>
+         ~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:43:5 - error NG8001: 'mat-spinner' is not a known element:
+1. If 'mat-spinner' is an Angular component, then verify that it is part of this module.
+2. If 'mat-spinner' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+43     <mat-spinner></mat-spinner>
+       ~~~~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:48:5 - error NG8001: 'mat-icon' is not a known element:
+1. If 'mat-icon' is an Angular component, then verify that it is part of this module.
+2. If 'mat-icon' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+48     <mat-icon>error</mat-icon>
+       ~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:54:22 - error NG8002: Can't bind to 'dataSource' since it isn't a known property of 'table'.
+
+54     <table mat-table [dataSource]="emplacements" class="mat-elevation-z8">
+                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:91:13 - error NG8001: 'mat-icon' is not a known element:
+1. If 'mat-icon' is an Angular component, then verify that it is part of this module.
+2. If 'mat-icon' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+91             <mat-icon>edit</mat-icon>
+               ~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:96:13 - error NG8001: 'mat-icon' is not a known element:
+1. If 'mat-icon' is an Angular component, then verify that it is part of this module.
+2. If 'mat-icon' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+96             <mat-icon>delete</mat-icon>
+               ~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:112:5 - error NG8001: 'mat-paginator' is not a known element:
+1. If 'mat-paginator' is an Angular component, then verify that it is part of this module.
+2. If 'mat-paginator' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+112     <mat-paginator
+        ~~~~~~~~~~~~~~
+113       [length]="totalItems"
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+... 
+115       [pageSizeOptions]="[5, 10, 25, 50]"
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+116       (page)="onPageChange($event)">
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:113:7 - error NG8002: Can't bind to 'length' since it isn't a known property of 'mat-paginator'.
+1. If 'mat-paginator' is an Angular component and it has 'length' input, then verify that it is part of this module.
+2. If 'mat-paginator' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@NgModule.schemas' of this component.
+
+113       [length]="totalItems"
+          ~~~~~~~~~~~~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:114:7 - error NG8002: Can't bind to 'pageSize' since it isn't a known property of 'mat-paginator'.
+1. If 'mat-paginator' is an Angular component and it has 'pageSize' input, then verify that it is part of this module.
+2. If 'mat-paginator' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@NgModule.schemas' of this component.
+
+114       [pageSize]="pageSize"
+          ~~~~~~~~~~~~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/emplacements/emplacement-list.component.html:115:7 - error NG8002: Can't bind to 'pageSizeOptions' since it isn't a known property of 'mat-paginator'.
+1. If 'mat-paginator' is an Angular component and it has 'pageSizeOptions' input, then verify that it is part of this module.
+2. If 'mat-paginator' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@NgModule.schemas' of this component.
+
+115       [pageSizeOptions]="[5, 10, 25, 50]"
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  src/app/features/emplacements/emplacement-list.component.ts:8:16
+    8   templateUrl: './emplacement-list.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component EmplacementListComponent.
+
+
+Error: src/app/features/employees/employee-list/employee-list.component.ts:7:26 - error TS2306: File '/workspaces/StockMind/frontend/src/app/core/models/employee.model.ts' is not a module.
+
+7 import { Employee } from '../../../core/models/employee.model';
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/features/equipment/equipment-list/equipment-list.component.ts:8:26 - error TS2306: File '/workspaces/StockMind/frontend/src/app/core/models/employee.model.ts' is not a module.
+
+8 import { Employee } from '../../../core/models/employee.model';
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
