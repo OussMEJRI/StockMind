@@ -18,6 +18,8 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
   userInput = '';
   loading = false;
   dataLoaded = false;
+  isOpen = false;
+  unreadCount = 0;
 
   constructor(
     private chatbotService: ChatbotService,
@@ -28,12 +30,14 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
   ) {}
 
   ngOnInit(): void {
-    // ✅ S'abonner au flux de messages du service
     this.chatbotService.messages$.subscribe(msgs => {
+      // Compter les nouveaux messages bot quand le chat est fermé
+      if (!this.isOpen && msgs.length > this.messages.length) {
+        const newMsgs = msgs.slice(this.messages.length);
+        this.unreadCount += newMsgs.filter(m => !m.isUser).length;
+      }
       this.messages = msgs;
     });
-
-    // ✅ Charger les données
     this.loadData();
   }
 
@@ -41,38 +45,37 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
     this.scrollToBottom();
   }
 
+  toggleChat(): void {
+    this.isOpen = !this.isOpen;
+    if (this.isOpen) {
+      this.unreadCount = 0;
+    }
+  }
+
   loadData(): void {
     this.loading = true;
-
-    // ✅ Chargement parallèle avec forkJoin
     forkJoin({
       equipment: this.equipmentService.getEquipment(0, 100),
       employees: this.employeeService.getEmployees(0, 100),
       emplacements: this.emplacementService.getEmplacements(0, 100)
     }).subscribe({
       next: ({ equipment, employees, emplacements }) => {
-        // ✅ Appel correct - loadAppData n'est pas un Observable
         this.chatbotService.loadAppData(equipment, employees, emplacements);
         this.dataLoaded = true;
         this.loading = false;
-
-        // ✅ Message de bienvenue avec les vraies données
         this.chatbotService.clearMessages();
         this.addBotMessage(
           `✅ Données chargées !\n\n` +
-          `📊 Résumé de l'inventaire :\n` +
+          `📊 Résumé :\n` +
           `• ${equipment.length} équipements\n` +
           `• ${employees.length} employés\n` +
           `• ${emplacements.length} emplacements\n\n` +
           `Tapez "aide" pour voir ce que je peux faire.`
         );
       },
-      error: (err) => {
+      error: () => {
         this.loading = false;
-        this.addBotMessage(
-          "❌ Erreur lors du chargement des données. Veuillez réessayer."
-        );
-        console.error('Erreur chargement données chatbot:', err);
+        this.addBotMessage("❌ Erreur lors du chargement. Veuillez réessayer.");
       }
     });
   }
@@ -80,13 +83,15 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
   sendMessage(): void {
     const message = this.userInput.trim();
     if (!message) return;
-
     this.userInput = '';
-    // ✅ sendMessage gère tout en interne (user + bot)
     this.chatbotService.sendMessage(message);
   }
 
-  // ✅ Méthode locale pour ajouter un message bot directement
+  quickSend(text: string): void {
+    this.userInput = text;
+    this.sendMessage();
+  }
+
   private addBotMessage(text: string): void {
     const messages = [...this.chatbotService['messagesSubject'].value];
     messages.push({ text, isUser: false, timestamp: new Date() });

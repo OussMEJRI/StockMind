@@ -1,75 +1,77 @@
-<div class="chatbot-container">
-  <div class="chatbot-header">
-    <div class="header-title">
-      <h1>🤖 Assistant IT Inventory</h1>
-      <p class="subtitle">Posez vos questions sur l'inventaire</p>
-    </div>
-    <div class="header-actions">
-      <button class="btn btn-refresh" (click)="refreshData()" [disabled]="loading">
-        🔄 Actualiser
-      </button>
-      <button class="btn btn-clear" (click)="clearChat()">
-        🗑️ Effacer
-      </button>
-    </div>
-  </div>
 
-  <div class="messages-container" #messagesContainer>
-    <div *ngFor="let message of messages" 
-         [class]="message.isUser ? 'message user-message' : 'message bot-message'">
-      <div class="message-avatar">
-        {{ message.isUser ? '👤' : '🤖' }}
-      </div>
-      <div class="message-content">
-        <div class="message-text" [innerHTML]="formatMessage(message.text)"></div>
-        <div class="message-time">
-          {{ message.timestamp | date:'HH:mm' }}
+<!-- ─── Bouton flottant ─── -->
+<div class="chat-fab" (click)="toggleChat()" [class.open]="isOpen">
+  <span class="fab-icon" *ngIf="!isOpen">🤖</span>
+  <span class="fab-icon" *ngIf="isOpen">✕</span>
+  <span class="fab-badge" *ngIf="unreadCount > 0 && !isOpen">{{ unreadCount }}</span>
+</div>
+
+<!-- ─── Fenêtre de chat ─── -->
+<div class="chat-window" [class.visible]="isOpen">
+
+  <!-- Header -->
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <div class="bot-avatar">🤖</div>
+      <div>
+        <div class="bot-name">Assistant IT</div>
+        <div class="bot-status">
+          <span class="status-dot"></span> En ligne
         </div>
       </div>
     </div>
+    <div class="chat-header-actions">
+      <button class="icon-btn" (click)="refreshData()" [disabled]="loading" title="Actualiser">🔄</button>
+      <button class="icon-btn" (click)="clearChat()" title="Effacer">🗑️</button>
+      <button class="icon-btn" (click)="toggleChat()" title="Fermer">✕</button>
+    </div>
+  </div>
 
-    <div *ngIf="loading" class="message bot-message">
-      <div class="message-avatar">🤖</div>
-      <div class="message-content">
+  <!-- Messages -->
+  <div class="chat-messages" #messagesContainer>
+    <div *ngFor="let message of messages"
+         [class]="message.isUser ? 'msg msg-user' : 'msg msg-bot'">
+      <div class="msg-avatar" *ngIf="!message.isUser">🤖</div>
+      <div class="msg-bubble">
+        <div class="msg-text" [innerHTML]="formatMessage(message.text)"></div>
+        <div class="msg-time">{{ message.timestamp | date:'HH:mm' }}</div>
+      </div>
+      <div class="msg-avatar user-av" *ngIf="message.isUser">👤</div>
+    </div>
+
+    <!-- Typing -->
+    <div class="msg msg-bot" *ngIf="loading">
+      <div class="msg-avatar">🤖</div>
+      <div class="msg-bubble">
         <div class="typing-indicator">
-          <span></span>
-          <span></span>
-          <span></span>
+          <span></span><span></span><span></span>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="input-container">
-    <div class="quick-actions">
-      <button class="quick-btn" (click)="userInput = 'Combien d\'équipements ?'; sendMessage()">
-        📊 Statistiques
-      </button>
-      <button class="quick-btn" (click)="userInput = 'Équipements disponibles ?'; sendMessage()">
-        ✅ Disponibles
-      </button>
-      <button class="quick-btn" (click)="userInput = 'Combien de PC ?'; sendMessage()">
-        💻 PC
-      </button>
-      <button class="quick-btn" (click)="userInput = 'Aide'; sendMessage()">
-        ❓ Aide
-      </button>
-    </div>
-    
-    <div class="input-wrapper">
-      <textarea 
-        [(ngModel)]="userInput"
-        (keypress)="onKeyPress($event)"
-        placeholder="Posez votre question... (Entrée pour envoyer)"
-        rows="2"
-        [disabled]="!dataLoaded || loading">
-      </textarea>
-      <button 
-        class="btn btn-send" 
-        (click)="sendMessage()"
-        [disabled]="!userInput.trim() || !dataLoaded || loading">
-        📤 Envoyer
-      </button>
-    </div>
+  <!-- Actions rapides -->
+  <div class="quick-actions">
+    <button class="quick-btn" (click)="quickSend('Combien d\'équipements ?')">📊 Stats</button>
+    <button class="quick-btn" (click)="quickSend('Équipements disponibles ?')">✅ Dispo</button>
+    <button class="quick-btn" (click)="quickSend('Combien de PC ?')">💻 PC</button>
+    <button class="quick-btn" (click)="quickSend('Aide')">❓ Aide</button>
   </div>
+
+  <!-- Input -->
+  <div class="chat-input-area">
+    <textarea
+      [(ngModel)]="userInput"
+      (keypress)="onKeyPress($event)"
+      placeholder="Posez votre question..."
+      rows="1"
+      [disabled]="!dataLoaded || loading">
+    </textarea>
+    <button class="send-btn"
+      (click)="sendMessage()"
+      [disabled]="!userInput.trim() || !dataLoaded || loading">
+      ➤
+    </button>
+  </div>
+
 </div>

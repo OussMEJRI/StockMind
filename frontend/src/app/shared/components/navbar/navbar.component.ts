@@ -25,9 +25,6 @@ import { AuthService } from '../../../core/services/auth.service';
           <a routerLink="/emplacements" routerLinkActive="active">
             📍 Emplacements
           </a>
-          <a routerLink="/chatbot" routerLinkActive="active">
-            🤖 Chatbot
-          </a>
           <a routerLink="/carbon" routerLinkActive="active">
             🌱 Empreinte Carbone
           </a>
@@ -38,7 +35,7 @@ import { AuthService } from '../../../core/services/auth.service';
             👤 {{ authService.currentUserValue.first_name }}
             {{ authService.currentUserValue.last_name }}
           </span>
-          <button class="btn btn-sm btn-secondary" (click)="logout()">
+          <button class="btn-logout" (click)="logout()">
             🚪 Déconnexion
           </button>
         </div>
@@ -51,69 +48,93 @@ import { AuthService } from '../../../core/services/auth.service';
       top: 0;
       left: 0;
       right: 0;
-      background: white;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      z-index: 100;
+      background: #161b22;
+      border-bottom: 1px solid #21262d;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.4);
+      z-index: 1000;
     }
+
     .navbar-container {
       max-width: 1400px;
       margin: 0 auto;
-      padding: 0 1rem;
+      padding: 0 1.2rem;
       display: flex;
       align-items: center;
       height: 60px;
+      gap: 1rem;
     }
+
     .navbar-brand {
-      font-size: 1.25rem;
+      font-size: 1.1rem;
       font-weight: 700;
-      color: #667eea;
+      color: #39d353;
       text-decoration: none;
-      margin-right: 2rem;
+      margin-right: 1.5rem;
+      white-space: nowrap;
+      letter-spacing: 0.3px;
     }
+
+    .navbar-brand:hover { color: #56d364; }
+
     .navbar-menu {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.2rem;
       flex: 1;
     }
+
     .navbar-menu a {
-      padding: 0.5rem 1rem;
-      color: #666;
+      padding: 0.4rem 0.85rem;
+      color: #8b949e;
       text-decoration: none;
-      border-radius: 8px;
-      transition: all 0.3s;
-      font-size: 0.9rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      border: 1px solid transparent;
     }
+
     .navbar-menu a:hover {
-      background: #f5f5f5;
-      color: #333;
+      background: #21262d;
+      color: #e6edf3;
+      border-color: #30363d;
     }
+
     .navbar-menu a.active {
-      background: #667eea;
-      color: white;
+      background: rgba(57,211,83,0.12);
+      color: #39d353;
+      border-color: rgba(57,211,83,0.3);
     }
+
     .navbar-user {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.8rem;
+      margin-left: auto;
     }
+
     .user-name {
-      color: #666;
-      font-size: 0.9rem;
+      color: #8b949e;
+      font-size: 0.82rem;
+      white-space: nowrap;
     }
-    .btn {
-      padding: 6px 14px;
-      border: none;
+
+    .btn-logout {
+      background: rgba(248,81,73,0.1);
+      border: 1px solid rgba(248,81,73,0.3);
+      color: #f85149;
+      padding: 0.35rem 0.85rem;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+      white-space: nowrap;
     }
-    .btn-secondary {
-      background: #f5f5f5;
-      color: #333;
+
+    .btn-logout:hover {
+      background: rgba(248,81,73,0.2);
+      border-color: rgba(248,81,73,0.5);
     }
-    .btn-secondary:hover {
-      background: #e0e0e0;
-    }
+
     @media (max-width: 992px) {
       .navbar-menu { display: none; }
     }

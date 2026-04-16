@@ -9,12 +9,13 @@ import { AuthService } from './core/services/auth.service';
       <main class="main-content" [class.no-nav]="!authService.isAuthenticated()">
         <router-outlet></router-outlet>
       </main>
+      <app-chatbot *ngIf="authService.isAuthenticated()"></app-chatbot>
     </div>
   `,
   styles: [`
     .app-container {
       min-height: 100vh;
-      background: #f5f5f5;
+      background: #111217;
     }
     .main-content {
       padding-top: 60px;
@@ -26,6 +27,5 @@ import { AuthService } from './core/services/auth.service';
 })
 export class AppComponent {
   title = 'IT Inventory Manager';
-
   constructor(public authService: AuthService) {}
 }

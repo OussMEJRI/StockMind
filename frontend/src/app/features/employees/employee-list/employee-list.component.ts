@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import * as XLSX from 'xlsx';
@@ -39,7 +39,7 @@ import { Employee, EquipmentHistory } from '../../../core/models/employee.model'
               <th>CUID</th>
               <th>Contrat</th>
               <th>Département</th>
-              <th>Actions</th>
+              <th class="th-actions">⋮</th>
             </tr>
           </thead>
           <tbody>
@@ -61,21 +61,30 @@ import { Employee, EquipmentHistory } from '../../../core/models/employee.model'
                   {{ employee.department }}
                 </span>
               </td>
-              <td>
-                <div class="action-buttons">
-                  <!-- ✅ Bouton Historique -->
-                  <button class="btn btn-sm btn-history"
-                          (click)="viewHistory(employee)">
-                    📋 Historique
+              <td class="td-actions">
+                <!-- Bouton 3 points -->
+                <div class="menu-wrapper">
+                  <button class="btn-dots"
+                          (click)="toggleMenu($event, employee.id!)">
+                    ⋮
                   </button>
-                  <button class="btn btn-sm btn-info"
-                          (click)="editEmployee(employee.id!)">
-                    ✏️ Modifier
-                  </button>
-                  <button class="btn btn-sm btn-danger"
-                          (click)="deleteEmployee(employee.id!)">
-                    🗑️ Supprimer
-                  </button>
+                  <!-- Dropdown menu -->
+                  <div class="dropdown-menu"
+                       *ngIf="openMenuId === employee.id">
+                    <button class="dropdown-item item-history"
+                            (click)="viewHistory(employee); closeMenu()">
+                      📋 Historique
+                    </button>
+                    <button class="dropdown-item item-edit"
+                            (click)="editEmployee(employee.id!); closeMenu()">
+                      ✏️ Modifier
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item item-delete"
+                            (click)="deleteEmployee(employee.id!); closeMenu()">
+                      🗑️ Supprimer
+                    </button>
+                  </div>
                 </div>
               </td>
             </tr>
@@ -87,7 +96,7 @@ import { Employee, EquipmentHistory } from '../../../core/models/employee.model'
       </div>
     </div>
 
-    <!-- ✅ Modal Historique -->
+    <!-- Modal Historique -->
     <div class="modal-overlay" *ngIf="showHistoryModal" (click)="closeHistory()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
@@ -100,17 +109,12 @@ import { Employee, EquipmentHistory } from '../../../core/models/employee.model'
         </div>
 
         <div class="modal-body">
-          <!-- Chargement -->
           <div class="loading" *ngIf="loadingHistory">
             ⏳ Chargement de l'historique...
           </div>
-
-          <!-- Aucun historique -->
           <div class="no-data" *ngIf="!loadingHistory && history.length === 0">
             📭 Aucun équipement attribué à cet employé
           </div>
-
-          <!-- Tableau historique -->
           <table class="table" *ngIf="!loadingHistory && history.length > 0">
             <thead>
               <tr>
@@ -125,14 +129,10 @@ import { Employee, EquipmentHistory } from '../../../core/models/employee.model'
             </thead>
             <tbody>
               <tr *ngFor="let h of history">
-                <td>
-                  <code>{{ h.equipment_serial || '-' }}</code>
-                </td>
+                <td><code>{{ h.equipment_serial || '-' }}</code></td>
                 <td>{{ h.equipment_model || '-' }}</td>
                 <td>
-                  <span class="badge badge-info">
-                    {{ h.equipment_type || '-' }}
-                  </span>
+                  <span class="badge badge-info">{{ h.equipment_type || '-' }}</span>
                 </td>
                 <td>{{ formatDate(h.assigned_at) }}</td>
                 <td>{{ h.returned_at ? formatDate(h.returned_at) : '-' }}</td>
@@ -155,107 +155,272 @@ import { Employee, EquipmentHistory } from '../../../core/models/employee.model'
     </div>
   `,
   styles: [`
-    .page-container { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+    /* ─── Layout ─── */
+    .page-container {
+      padding: 1.5rem 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      background: #0d1117;
+      min-height: 100vh;
+    }
+
     .page-header {
-      display: flex; justify-content: space-between;
-      align-items: center; margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
     }
-    .page-header h1 { margin: 0; color: #2c3e50; }
-    .header-actions { display: flex; gap: 1rem; }
 
-    .table-card {
-      background: white; border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;
+    .page-header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: #e6edf3;
+      font-weight: 600;
     }
-    .table { width: 100%; border-collapse: collapse; }
-    .table th {
-      padding: 12px 16px; background: #f8f9fa;
-      font-weight: 600; color: #555;
-      border-bottom: 2px solid #dee2e6; text-align: left;
-    }
-    .table td { padding: 12px 16px; border-bottom: 1px solid #eee; }
-    .table tbody tr:hover { background: #f9f9f9; }
 
-    .badge {
-      padding: 4px 10px; border-radius: 12px;
-      font-size: 0.8rem; font-weight: 500;
-    }
-    .badge-info      { background: #e3f2fd; color: #1565c0; }
-    .badge-primary   { background: #ede7f6; color: #4527a0; }
-    .badge-success   { background: #e8f5e9; color: #2e7d32; }
-    .badge-warning   { background: #fff8e1; color: #f57f17; }
-    .badge-danger    { background: #ffebee; color: #c62828; }
-    .badge-secondary { background: #f5f5f5; color: #616161; }
+    .header-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; }
 
-    .action-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
+    /* ─── Buttons ─── */
     .btn {
-      padding: 8px 16px; border: none; border-radius: 6px;
-      cursor: pointer; font-size: 0.9rem; font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.45rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+      font-family: inherit;
     }
-    .btn-primary   { background: #667eea; color: white; }
-    .btn-secondary { background: #6c757d; color: white; }
-    .btn-info      { background: #17a2b8; color: white; }
-    .btn-danger    { background: #dc3545; color: white; }
-    .btn-history   { background: #fd7e14; color: white; }
-    .btn-sm        { padding: 5px 10px; font-size: 0.8rem; }
-    .btn:hover     { opacity: 0.85; }
 
-    .text-muted { color: #999; }
-    .no-data { text-align: center; padding: 40px; color: #999; }
-    .loading { text-align: center; padding: 40px; color: #667eea; font-size: 1.1rem; }
-    .alert { padding: 1rem; border-radius: 6px; margin-bottom: 1rem; }
-    .alert-danger { background: #f8d7da; color: #721c24; }
+    .btn-primary {
+      background: rgba(57,211,83,0.12);
+      border-color: rgba(57,211,83,0.35);
+      color: #39d353;
+    }
+    .btn-primary:hover {
+      background: rgba(57,211,83,0.22);
+      border-color: rgba(57,211,83,0.6);
+    }
 
-    /* ✅ Modal styles */
+    .btn-secondary {
+      background: rgba(56,139,253,0.1);
+      border-color: rgba(56,139,253,0.3);
+      color: #388bfd;
+    }
+    .btn-secondary:hover {
+      background: rgba(56,139,253,0.2);
+      border-color: rgba(56,139,253,0.5);
+    }
+
+    /* ─── Table ─── */
+    .table-card {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 10px;
+      overflow: visible;
+    }
+
+    .table { width: 100%; border-collapse: collapse; }
+
+    .table th {
+      padding: 0.7rem 1rem;
+      background: #0d1117;
+      font-weight: 600;
+      font-size: 0.72rem;
+      color: #484f58;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border-bottom: 1px solid #21262d;
+      text-align: left;
+    }
+
+    .table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #21262d;
+      font-size: 0.85rem;
+      color: #8b949e;
+    }
+
+    .table td strong { color: #e6edf3; }
+    .table tbody tr:last-child td { border-bottom: none; }
+    .table tbody tr:hover { background: #1c2128; }
+    .table tbody tr:hover td { color: #e6edf3; }
+
+    /* ─── Colonne actions ─── */
+    .th-actions {
+      text-align: center !important;
+      font-size: 1.2rem !important;
+      color: #30363d !important;
+      width: 50px;
+    }
+
+    .td-actions {
+      text-align: center;
+      position: relative;
+      overflow: visible;
+    }
+
+    /* ─── Bouton 3 points ─── */
+    .btn-dots {
+      background: none;
+      border: 1px solid transparent;
+      color: #8b949e;
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      line-height: 1;
+      transition: all 0.2s;
+      font-weight: 700;
+    }
+
+    .btn-dots:hover {
+      background: #21262d;
+      border-color: #30363d;
+      color: #e6edf3;
+    }
+
+    /* ─── Dropdown menu ─── */
+    .menu-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 4px);
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      min-width: 160px;
+      z-index: 9999;
+      overflow: hidden;
+      animation: fadeIn 0.12s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.55rem 1rem;
+      background: none;
+      border: none;
+      font-size: 0.83rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      text-align: left;
+      font-family: inherit;
+    }
+
+    .item-history { color: #e3b341; }
+    .item-history:hover { background: rgba(227,179,65,0.1); }
+
+    .item-edit { color: #388bfd; }
+    .item-edit:hover { background: rgba(56,139,253,0.1); }
+
+    .item-delete { color: #f85149; }
+    .item-delete:hover { background: rgba(248,81,73,0.1); }
+
+    .dropdown-divider {
+      height: 1px;
+      background: #21262d;
+      margin: 0.2rem 0;
+    }
+
+    /* ─── Badges ─── */
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .badge-info      { background: rgba(56,139,253,0.12);  color: #388bfd; border: 1px solid rgba(56,139,253,0.3); }
+    .badge-primary   { background: rgba(188,140,255,0.12); color: #bc8cff; border: 1px solid rgba(188,140,255,0.3); }
+    .badge-success   { background: rgba(57,211,83,0.12);   color: #39d353; border: 1px solid rgba(57,211,83,0.3); }
+    .badge-warning   { background: rgba(227,179,65,0.12);  color: #e3b341; border: 1px solid rgba(227,179,65,0.3); }
+    .badge-danger    { background: rgba(248,81,73,0.12);   color: #f85149; border: 1px solid rgba(248,81,73,0.3); }
+    .badge-secondary { background: rgba(139,148,158,0.12); color: #8b949e; border: 1px solid rgba(139,148,158,0.3); }
+
+    /* ─── Misc ─── */
+    .text-muted { color: #484f58; }
+    .no-data { text-align: center; padding: 2.5rem; color: #484f58; font-size: 0.88rem; }
+    .loading  { text-align: center; padding: 2.5rem; color: #8b949e; font-size: 0.88rem; }
+
+    .alert { padding: 0.8rem 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.85rem; }
+    .alert-danger { background: rgba(248,81,73,0.08); border: 1px solid rgba(248,81,73,0.3); color: #f85149; }
+
+    /* ─── Modal ─── */
     .modal-overlay {
       position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.7);
       display: flex; align-items: center;
       justify-content: center; z-index: 1000;
+      backdrop-filter: blur(2px);
     }
+
     .modal-content {
-      background: white; border-radius: 12px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
       width: 90%; max-width: 900px;
-      max-height: 80vh; display: flex;
-      flex-direction: column;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-height: 80vh;
+      display: flex; flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
     }
+
     .modal-header {
       display: flex; align-items: center;
-      gap: 1rem; padding: 1.5rem;
-      border-bottom: 1px solid #eee;
+      gap: 1rem; padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid #21262d;
       flex-wrap: wrap;
     }
-    .modal-header h2 { margin: 0; flex: 1; color: #2c3e50; }
+
+    .modal-header h2 { margin: 0; flex: 1; color: #e6edf3; font-size: 1rem; }
     .employee-info { display: flex; gap: 0.5rem; }
+
     .btn-close {
       background: none; border: none;
-      font-size: 1.2rem; cursor: pointer;
-      color: #999; padding: 4px 8px;
-      border-radius: 4px;
+      font-size: 1rem; cursor: pointer;
+      color: #8b949e; padding: 4px 8px;
+      border-radius: 4px; transition: all 0.2s;
     }
-    .btn-close:hover { background: #f0f0f0; color: #333; }
-    .modal-body {
-      padding: 1.5rem; overflow-y: auto; flex: 1;
-    }
+    .btn-close:hover { background: rgba(248,81,73,0.1); color: #f85149; }
+
+    .modal-body { padding: 1.2rem 1.5rem; overflow-y: auto; flex: 1; }
+
     .modal-footer {
-      padding: 1rem 1.5rem;
-      border-top: 1px solid #eee;
+      padding: 0.8rem 1.5rem;
+      border-top: 1px solid #21262d;
       display: flex; justify-content: flex-end;
     }
+
     code {
-      background: #f4f4f4; padding: 2px 6px;
-      border-radius: 4px; font-size: 0.85rem;
-      color: #e83e8c;
+      background: #0d1117; padding: 2px 6px;
+      border-radius: 4px; font-size: 0.82rem;
+      color: #f778ba; border: 1px solid #21262d;
     }
   `]
 })
 export class EmployeeListComponent implements OnInit {
   employees: Employee[] = [];
   error = '';
+  openMenuId: number | null = null;
 
-  // ✅ Historique
   showHistoryModal = false;
   selectedEmployee: Employee | null = null;
   history: EquipmentHistory[] = [];
@@ -266,10 +431,20 @@ export class EmployeeListComponent implements OnInit {
     private router: Router
   ) {}
 
-  ngOnInit(): void {
-    this.loadEmployees();
+  ngOnInit(): void { this.loadEmployees(); }
+
+  /* ─── Fermer menu si clic ailleurs ─── */
+  @HostListener('document:click')
+  onDocumentClick(): void { this.openMenuId = null; }
+
+  toggleMenu(event: Event, id: number): void {
+    event.stopPropagation();
+    this.openMenuId = this.openMenuId === id ? null : id;
   }
 
+  closeMenu(): void { this.openMenuId = null; }
+
+  /* ─── CRUD ─── */
   loadEmployees(): void {
     this.employeeService.getEmployees(0, 100).subscribe({
       next: (data) => { this.employees = data; },
@@ -280,7 +455,6 @@ export class EmployeeListComponent implements OnInit {
     });
   }
 
-  // ✅ Ouvrir le modal historique
   viewHistory(employee: Employee): void {
     this.selectedEmployee = employee;
     this.showHistoryModal = true;
@@ -288,25 +462,17 @@ export class EmployeeListComponent implements OnInit {
     this.history = [];
 
     this.employeeService.getEmployeeHistory(employee.id!).subscribe({
-      next: (data) => {
-        this.history = data;
-        this.loadingHistory = false;
-      },
-      error: () => {
-        this.loadingHistory = false;
-        this.error = 'Erreur lors du chargement de l\'historique';
-      }
+      next: (data) => { this.history = data; this.loadingHistory = false; },
+      error: () => { this.loadingHistory = false; }
     });
   }
 
-  // ✅ Fermer le modal
   closeHistory(): void {
     this.showHistoryModal = false;
     this.selectedEmployee = null;
     this.history = [];
   }
 
-  // ✅ Formater les dates
   formatDate(dateStr: string): string {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('fr-FR', {
@@ -328,10 +494,8 @@ export class EmployeeListComponent implements OnInit {
 
   getContractBadge(contractType: string | undefined): string {
     const badges: Record<string, string> = {
-      'CDI': 'badge-success',
-      'CDD': 'badge-warning',
-      'STAGIAIRE': 'badge-info',
-      'EXTERNE': 'badge-secondary'
+      'CDI': 'badge-success', 'CDD': 'badge-warning',
+      'STAGIAIRE': 'badge-info', 'EXTERNE': 'badge-secondary'
     };
     return badges[contractType || ''] || 'badge-secondary';
   }
@@ -353,7 +517,6 @@ export class EmployeeListComponent implements OnInit {
   onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (e: any) => {
       try {
@@ -361,7 +524,6 @@ export class EmployeeListComponent implements OnInit {
         const workbook = XLSX.read(data, { type: 'array' });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const jsonData: any[] = XLSX.utils.sheet_to_json(sheet);
-
         const employees: Employee[] = jsonData.map(row => ({
           name: row['Nom complet'] || row['name'] || '',
           email: row['Email'] || row['email'] || '',
@@ -369,35 +531,20 @@ export class EmployeeListComponent implements OnInit {
           contract_type: row['Type de contrat'] || row['contract_type'] || undefined,
           department: row['Département'] || row['department'] || undefined
         }));
-
-        let success = 0;
-        let errors = 0;
-
+        let success = 0, errors = 0;
         employees.forEach((emp, i) => {
           this.employeeService.createEmployee(emp).subscribe({
-            next: () => {
-              success++;
-              if (i === employees.length - 1) this.showResult(success, errors);
-            },
-            error: () => {
-              errors++;
-              if (i === employees.length - 1) this.showResult(success, errors);
-            }
+            next: () => { success++; if (i === employees.length - 1) this.showResult(success, errors); },
+            error: () => { errors++; if (i === employees.length - 1) this.showResult(success, errors); }
           });
         });
-      } catch {
-        this.error = 'Erreur lors de la lecture du fichier Excel';
-      }
+      } catch { this.error = 'Erreur lors de la lecture du fichier Excel'; }
     };
     reader.readAsArrayBuffer(file);
   }
 
   private showResult(success: number, errors: number): void {
-    if (errors === 0) {
-      alert(`✅ ${success} employé(s) importé(s) avec succès !`);
-    } else {
-      alert(`⚠️ ${success} importé(s), ${errors} erreur(s)`);
-    }
+    alert(errors === 0 ? `✅ ${success} employé(s) importé(s) !` : `⚠️ ${success} importé(s), ${errors} erreur(s)`);
     this.loadEmployees();
   }
 }
