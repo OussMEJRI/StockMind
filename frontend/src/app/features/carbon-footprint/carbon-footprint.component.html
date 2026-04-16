@@ -1,0 +1,90 @@
+<div class="carbon-container">
+
+  <!-- Header -->
+  <div class="carbon-header">
+    <div>
+      <h1>🌱 Impact carbone</h1>
+      <p>Consommation estimée sur les 30 derniers jours basée sur <strong>{{ nbPcs }} PCs connectés</strong></p>
+    </div>
+    <button class="btn-refresh" (click)="refresh()" [disabled]="loading">
+      🔄 Actualiser
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-card" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Calcul en cours...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-card" *ngIf="error && !loading">
+    <p>⚠️ Impossible de récupérer les données</p>
+    <button (click)="refresh()">Réessayer</button>
+  </div>
+
+  <!-- Résultats -->
+  <div *ngIf="!loading && !error">
+
+    <!-- Chiffre principal CO2 -->
+    <div class="main-card">
+      <div class="co2-value">{{ co2Grammes | number:'1.0-0' }}<span class="unit">g eCO₂*</span></div>
+      <p class="co2-subtitle">
+        Émissions produites sur les 30 derniers jours<br>
+        ce qui revient à parcourir ou consommer
+      </p>
+
+      <!-- Équivalences -->
+      <div class="equivalences">
+        <div class="equiv-item">
+          <span class="equiv-icon">🖥️</span>
+          <div class="equiv-value">{{ heuresStreaming }}</div>
+          <div class="equiv-label">heures<br>de streaming vidéo</div>
+        </div>
+        <div class="equiv-item">
+          <span class="equiv-icon">🚗</span>
+          <div class="equiv-value">{{ kmVoiture | number:'1.0-0' }} km</div>
+          <div class="equiv-label">en voiture<br>thermique</div>
+        </div>
+        <div class="equiv-item">
+          <span class="equiv-icon">🚄</span>
+          <div class="equiv-value">{{ kmTgv | number:'1.0-0' }} km</div>
+          <div class="equiv-label">en TGV</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Détails de calcul -->
+    <div class="details-grid">
+      <div class="detail-card">
+        <div class="detail-icon">💻</div>
+        <div class="detail-value">{{ nbPcs | number:'1.0-0' }}</div>
+        <div class="detail-label">PCs connectés</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-icon">⚡</div>
+        <div class="detail-value">{{ WATTS_PER_PC }}W</div>
+        <div class="detail-label">par PC</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-icon">🔋</div>
+        <div class="detail-value">{{ consommationKwh | number:'1.0-0' }}</div>
+        <div class="detail-label">kWh consommés</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-icon">🌍</div>
+        <div class="detail-value">{{ co2Kg | number:'1.2-2' }}</div>
+        <div class="detail-label">kg de CO₂</div>
+      </div>
+    </div>
+
+    <!-- Note méthodologie -->
+    <div class="methodology-note">
+      * L'impact eCO₂ est calculé sur la base de <strong>{{ WATTS_PER_PC }}W par PC</strong>,
+      <strong>{{ HOURS_PER_DAY }}h/jour</strong> pendant <strong>{{ DAYS }} jours</strong>,
+      avec un facteur d'émission de <strong>{{ CO2_PER_KWH * 1000 }}g CO₂/kWh</strong> 
+      Les conversions : 1km voiture = 218g eCO₂, 1km TGV = 2,93g eCO₂, 1h streaming = 63,7g eCO₂.
+    </div>
+
+  </div>
+</div>

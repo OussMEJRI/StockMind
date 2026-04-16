@@ -1,4 +1,45 @@
 <div class="dashboard-container">
+
+  <!-- ✅ Bannière animée PC Switch Locator -->
+  <div class="pc-banner">
+    <div class="pc-banner-bg">
+      <div class="pc-banner-content">
+        <div class="pc-icon-wrapper">
+          <span class="pc-icon">🖥️</span>
+          <div class="pulse-ring"></div>
+          <div class="pulse-ring delay1"></div>
+          <div class="pulse-ring delay2"></div>
+        </div>
+        <div class="pc-info">
+          <div class="pc-label">Nombre de PC détectés</div>
+          <div class="pc-count" *ngIf="!nbPcsLoading && !nbPcsError">
+            {{ nbPcsDisplay | number }}
+            <span class="pc-unit">PC</span>
+          </div>
+          <div class="pc-loading" *ngIf="nbPcsLoading">
+            <div class="dot-pulse"></div>
+          </div>
+          <div class="pc-error" *ngIf="nbPcsError">
+            ⚠️ Service indisponible
+          </div>
+          <div class="pc-source">📡 Switch Locator - Mis à jour toutes les 2h</div>
+        </div>
+        <div class="pc-badge">
+          <div class="live-dot"></div>
+          LIVE
+        </div>
+      </div>
+      <div class="floating-icons">
+        <span class="float-icon f1">💻</span>
+        <span class="float-icon f2">🖥️</span>
+        <span class="float-icon f3">⌨️</span>
+        <span class="float-icon f4">🖱️</span>
+        <span class="float-icon f5">📡</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
   <div class="dashboard-header">
     <h1>📊 Tableau de Bord</h1>
     <button class="btn btn-primary" (click)="refresh()">
@@ -16,6 +57,7 @@
     <p>Chargement des données...</p>
   </div>
 
+  <!-- Stats -->
   <div class="stats-grid" *ngIf="!loading">
     <div class="stat-card">
       <div class="stat-icon">💻</div>
@@ -24,7 +66,6 @@
         <div class="stat-label">Total Équipements</div>
       </div>
     </div>
-
     <div class="stat-card">
       <div class="stat-icon">👥</div>
       <div class="stat-content">
@@ -32,7 +73,6 @@
         <div class="stat-label">Total Employés</div>
       </div>
     </div>
-
     <div class="stat-card">
       <div class="stat-icon">📦</div>
       <div class="stat-content">
@@ -40,7 +80,6 @@
         <div class="stat-label">En Stock</div>
       </div>
     </div>
-
     <div class="stat-card">
       <div class="stat-icon">✅</div>
       <div class="stat-content">
@@ -48,18 +87,31 @@
         <div class="stat-label">Assignés</div>
       </div>
     </div>
+    <div class="stat-card">
+      <div class="stat-icon">🔧</div>
+      <div class="stat-content">
+        <div class="stat-value">{{ equipmentMaintenance }}</div>
+        <div class="stat-label">En Maintenance</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📍</div>
+      <div class="stat-content">
+        <div class="stat-value">{{ totalEmplacements }}</div>
+        <div class="stat-label">Emplacements</div>
+      </div>
+    </div>
   </div>
 
+  <!-- Tableau récent -->
   <div class="recent-section" *ngIf="!loading">
     <h2>📋 Équipements Récents</h2>
-    
     <div class="no-data" *ngIf="recentEquipment.length === 0">
       <p>Aucun équipement trouvé</p>
       <button class="btn btn-primary" routerLink="/equipment/new">
         ➕ Ajouter un équipement
       </button>
     </div>
-
     <table class="data-table" *ngIf="recentEquipment.length > 0">
       <thead>
         <tr>
@@ -88,7 +140,6 @@
         </tr>
       </tbody>
     </table>
-
     <div class="view-all" *ngIf="recentEquipment.length > 0">
       <button class="btn btn-secondary" routerLink="/equipment">
         Voir tous les équipements →

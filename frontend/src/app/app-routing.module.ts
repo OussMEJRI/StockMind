@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
+import { CarbonFootprintComponent } from './features/carbon-footprint/carbon-footprint.component';
 
 // Auth
 import { LoginComponent } from './features/auth/login/login.component';
@@ -16,7 +17,7 @@ import { EquipmentFormComponent } from './features/equipment/equipment-form/equi
 import { EmployeeListComponent } from './features/employees/employee-list/employee-list.component';
 import { EmployeeFormComponent } from './features/employees/employee-form/employee-form.component';
 
-// ✅ Emplacements (remplace Location)
+// Emplacements
 import { EmplacementListComponent } from './features/emplacements/emplacement-list.component';
 import { EmplacementFormComponent } from './features/emplacements/emplacement-form.component';
 
@@ -48,13 +49,16 @@ const routes: Routes = [
       { path: 'employees/new', component: EmployeeFormComponent },
       { path: 'employees/edit/:id', component: EmployeeFormComponent },
 
-      // ✅ Emplacements (plus de /locations)
-      { path: 'emplacements', component: EmplacementListComponent },
-      { path: 'emplacements/new', component: EmplacementFormComponent },
-      { path: 'emplacements/edit/:id', component: EmplacementFormComponent },
+      // Emplacements
+      { path: 'locations', component: EmplacementListComponent },
+      { path: 'locations/new', component: EmplacementFormComponent },
+      { path: 'locations/edit/:id', component: EmplacementFormComponent },
 
       // Chatbot
       { path: 'chatbot', component: ChatbotComponent },
+
+      // 🌱 Empreinte Carbone
+      { path: 'carbon', component: CarbonFootprintComponent },
     ]
   },
 

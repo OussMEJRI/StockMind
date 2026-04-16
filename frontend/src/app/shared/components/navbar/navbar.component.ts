@@ -22,12 +22,14 @@ import { AuthService } from '../../../core/services/auth.service';
           <a routerLink="/employees" routerLinkActive="active">
             👥 Employés
           </a>
-          <!-- ✅ Route corrigée vers /emplacements -->
           <a routerLink="/emplacements" routerLinkActive="active">
             📍 Emplacements
           </a>
           <a routerLink="/chatbot" routerLinkActive="active">
             🤖 Chatbot
+          </a>
+          <a routerLink="/carbon" routerLinkActive="active">
+            🌱 Empreinte Carbone
           </a>
         </div>
 

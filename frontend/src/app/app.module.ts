@@ -4,6 +4,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { CarbonFootprintComponent } from './features/carbon-footprint/carbon-footprint.component';
 
 // ✅ Angular Material
 import { MatTableModule } from '@angular/material/table';
@@ -45,6 +46,7 @@ import { EquipmentFormComponent } from './features/equipment/equipment-form/equi
     EmplacementListComponent,
     EmplacementFormComponent,
     ChatbotComponent,
+    CarbonFootprintComponent,
     NavbarComponent
   ],
   imports: [

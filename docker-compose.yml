@@ -1,7 +1,16 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database
+  api-pc:
+    build:
+      context: ./switch-locator
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    restart: always
+    networks:
+      - inventory-network
+
   db:
     image: postgres:15-alpine
     container_name: inventory-db
@@ -22,7 +31,6 @@ services:
     networks:
       - inventory-network
 
-  # FastAPI Backend
   backend:
     build:
       context: ./backend
@@ -52,7 +60,6 @@ services:
     networks:
       - inventory-network
 
-  # Angular Frontend
   frontend:
     build:
       context: ./frontend
