@@ -7,6 +7,7 @@ import { Chart, registerables } from 'chart.js';
 import { EquipmentService } from '../../core/services/equipment.service';
 import { EmployeeService } from '../../core/services/employee.service';
 import { EmplacementService } from '../../core/services/emplacement.service';
+import { SwitchLocatorService } from '../../core/services/switch-locator.service';
 import { Equipment, EquipmentStatus } from '../../core/models/equipment.model';
 
 Chart.register(...registerables);
@@ -89,42 +90,52 @@ Chart.register(...registerables);
 
       <!-- KPI -->
       <div class="kpi-grid">
+
+        <div class="kpi-card border-cyan">
+          <div class="kpi-label">💻 PCS EN LIGNE</div>
+          <div class="kpi-val">{{ nbPcsOnline }}</div>
+          <div class="kpi-sub" style="color:#56d4dd">Assignés &amp; actifs</div>
+        </div>
+
         <div class="kpi-card">
-          <div class="kpi-label">ÉQUIPEMENTS</div>
+          <div class="kpi-label">⚙️ ÉQUIPEMENTS</div>
           <div class="kpi-val">{{ totalEquipments }}</div>
         </div>
+
         <div class="kpi-card border-green">
-          <div class="kpi-label">ASSIGNÉS</div>
+          <div class="kpi-label">✅ ASSIGNÉS</div>
           <div class="kpi-val">{{ assignes }}</div>
           <div class="kpi-sub" style="color:#39d353">{{ assignesPct }}% du parc</div>
         </div>
+
         <div class="kpi-card border-blue">
-          <div class="kpi-label">EN STOCK</div>
+          <div class="kpi-label">📦 EN STOCK</div>
           <div class="kpi-val">{{ enStock }}</div>
         </div>
+
         <div class="kpi-card border-orange">
-          <div class="kpi-label">MAINTENANCE</div>
+          <div class="kpi-label">🔧 MAINTENANCE</div>
           <div class="kpi-val">{{ enMaintenance }}</div>
           <div class="kpi-sub" [style.color]="enMaintenance>0?'#e3b341':'#39d353'">
             {{ enMaintenance > 0 ? '⚠ Action requise' : '✅ Aucune' }}
           </div>
         </div>
+
         <div class="kpi-card border-red">
-          <div class="kpi-label">RETIRÉS</div>
+          <div class="kpi-label">🚫 RETIRÉS</div>
           <div class="kpi-val">{{ retires }}</div>
         </div>
+
         <div class="kpi-card border-purple">
-          <div class="kpi-label">EMPLOYÉS</div>
+          <div class="kpi-label">👥 EMPLOYÉS</div>
           <div class="kpi-val">{{ totalEmployees }}</div>
         </div>
-        <div class="kpi-card border-teal">
-          <div class="kpi-label">EMPLACEMENTS</div>
-          <div class="kpi-val">{{ totalEmplacements }}</div>
-        </div>
+
         <div class="kpi-card border-yellow">
-          <div class="kpi-label">TAUX ASSIGNATION</div>
+          <div class="kpi-label">📊 TAUX ASSIGNATION</div>
           <div class="kpi-val">{{ assignesPct }}<span class="kpi-unit">%</span></div>
         </div>
+
       </div>
 
       <!-- Charts -->
@@ -198,30 +209,23 @@ Chart.register(...registerables);
       background: #0d1117;
     }
 
-    /* Sidebar — dans le flux, pas fixed */
+    /* ── Sidebar ── */
     .sidebar {
-      width: 195px;
-      min-width: 195px;
-      flex-shrink: 0;
-      background: #0d1117;
-      border-right: 1px solid #21262d;
-      padding: 1rem 0;
-      overflow-y: auto;
+      width: 195px; min-width: 195px; flex-shrink: 0;
+      background: #0d1117; border-right: 1px solid #21262d;
+      padding: 1rem 0; overflow-y: auto;
     }
     .sidebar-section { margin-bottom: 1.2rem; }
     .section-label {
       font-size: 0.6rem; font-weight: 700; color: #484f58;
-      letter-spacing: 1px; padding: 0 1rem 0.4rem;
-      text-transform: uppercase;
+      letter-spacing: 1px; padding: 0 1rem 0.4rem; text-transform: uppercase;
     }
     .sidebar-item {
       display: flex; align-items: center; gap: 0.5rem;
       padding: 0.38rem 1rem; cursor: pointer;
       font-size: 0.8rem; color: #8b949e; transition: all 0.15s;
     }
-    .sidebar-item:hover, .sidebar-item.active {
-      background: #161b22; color: #e6edf3;
-    }
+    .sidebar-item:hover, .sidebar-item.active { background: #161b22; color: #e6edf3; }
     .item-label { flex: 1; }
     .item-badge {
       font-size: 0.65rem; font-weight: 700;
@@ -230,10 +234,10 @@ Chart.register(...registerables);
     }
     .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
-    /* Main */
+    /* ── Main ── */
     .main { flex: 1; padding: 1.2rem 1.5rem; overflow-x: hidden; min-width: 0; }
 
-    /* Topbar */
+    /* ── Topbar ── */
     .topbar {
       display: flex; justify-content: space-between;
       align-items: flex-start; margin-bottom: 1.2rem; gap: 1rem;
@@ -262,7 +266,7 @@ Chart.register(...registerables);
     }
     .btn-link:hover { text-decoration: underline; }
 
-    /* Loading */
+    /* ── Loading ── */
     .loading-state {
       display: flex; align-items: center; gap: 0.8rem;
       padding: 3rem; color: #8b949e; font-size: 0.85rem;
@@ -274,7 +278,7 @@ Chart.register(...registerables);
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* KPI */
+    /* ── KPI ── */
     .kpi-grid {
       display: grid; grid-template-columns: repeat(4, 1fr);
       gap: 0.7rem; margin-bottom: 0.8rem;
@@ -284,12 +288,12 @@ Chart.register(...registerables);
       border-left: 3px solid #21262d; border-radius: 10px;
       padding: 0.9rem 1rem;
     }
+    .border-cyan   { border-left-color: #56d4dd; }
     .border-green  { border-left-color: #39d353; }
     .border-blue   { border-left-color: #388bfd; }
     .border-orange { border-left-color: #e3b341; }
     .border-red    { border-left-color: #f85149; }
     .border-purple { border-left-color: #bc8cff; }
-    .border-teal   { border-left-color: #56d4dd; }
     .border-yellow { border-left-color: #f0883e; }
 
     .kpi-label {
@@ -300,7 +304,7 @@ Chart.register(...registerables);
     .kpi-unit { font-size: 1rem; color: #8b949e; }
     .kpi-sub { font-size: 0.7rem; margin-top: 0.3rem; color: #8b949e; }
 
-    /* Charts */
+    /* ── Charts ── */
     .charts-row {
       display: grid; grid-template-columns: repeat(3, 1fr);
       gap: 0.7rem; margin-bottom: 0.8rem;
@@ -313,7 +317,7 @@ Chart.register(...registerables);
     .chart-body { position: relative; height: 190px; }
     .chart-body canvas { max-height: 190px !important; }
 
-    /* Table */
+    /* ── Table ── */
     .table-card {
       background: #161b22; border: 1px solid #21262d;
       border-radius: 10px; padding: 1rem 1.1rem; margin-bottom: 1rem;
@@ -338,7 +342,6 @@ Chart.register(...registerables);
     tbody tr:last-child td { border-bottom: none; }
     tbody tr:hover { background: #1c2128; }
     tbody tr:hover td { color: #e6edf3; }
-
     .badge-type {
       background: rgba(56,139,253,0.1); color: #388bfd;
       border: 1px solid rgba(56,139,253,0.25);
@@ -371,9 +374,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   @ViewChild('barChart')   barRef!:   ElementRef<HTMLCanvasElement>;
   @ViewChild('condChart')  condRef!:  ElementRef<HTMLCanvasElement>;
 
-  loading = true;
-  activeCat = '';
-
+  loading           = true;
+  activeCat         = '';
+  nbPcsOnline       = 0;
   allEquipments:    Equipment[] = [];
   totalEquipments   = 0;
   totalEmployees    = 0;
@@ -413,17 +416,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private typeColors = ['#388bfd','#39d353','#e3b341','#bc8cff','#f0883e'];
 
   constructor(
-    private equipmentService:   EquipmentService,
-    private employeeService:    EmployeeService,
-    private emplacementService: EmplacementService,
+    private equipmentService:    EquipmentService,
+    private employeeService:     EmployeeService,
+    private emplacementService:  EmplacementService,
+    private switchLocatorService: SwitchLocatorService,
     private router: Router,
     private cdr:    ChangeDetectorRef,
     private zone:   NgZone
   ) {}
 
-  ngOnInit(): void  { this.loadAll(); }
+  ngOnInit(): void    { this.loadAll(); }
   ngOnDestroy(): void { this.destroyCharts(); }
-
   go(path: string): void { this.router.navigate([path]); }
   reload(): void { this.loadAll(); }
 
@@ -436,18 +439,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.destroyCharts();
 
-    // ── 1. Équipements (limite 100 pour ne pas geler) ──
+    // ── PCs en ligne ──
+    this.switchLocatorService.getNbPcs().subscribe({
+      next: (data: { nb_pcs: number }) => {
+        this.nbPcsOnline = data.nb_pcs;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.nbPcsOnline = 0; }
+    });
+
+    // ── Équipements ──
     this.equipmentService.getEquipment(0, 100).subscribe({
       next: (equipments: Equipment[]) => {
         this.allEquipments    = equipments;
+        this.totalEquipments  = equipments.length;
         this.recentEquipments = equipments.slice(0, 8);
 
         this.assignes      = equipments.filter(e => e.status === EquipmentStatus.ASSIGNED).length;
         this.enStock       = equipments.filter(e => e.status === EquipmentStatus.IN_STOCK).length;
         this.enMaintenance = equipments.filter(e => e.status === EquipmentStatus.MAINTENANCE).length;
         this.retires       = equipments.filter(e => e.status === EquipmentStatus.RETIRED).length;
+        this.assignesPct   = this.totalEquipments > 0
+          ? Math.round((this.assignes / this.totalEquipments) * 100) : 0;
 
-        // Catégories sidebar
         const typeMap: Record<string,number> = {};
         equipments.forEach(e => {
           const t = (e.equipment_type as string) || 'other';
@@ -459,7 +473,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
           icon:  this.typeIcons[key]  || '📦',
           color: this.typeColors[i % this.typeColors.length]
         }));
-
         this.statutsList = [
           { label:'En stock',    color:'#388bfd', count: this.enStock },
           { label:'Assignés',    color:'#39d353', count: this.assignes },
@@ -467,39 +480,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
           { label:'Retirés',     color:'#f85149', count: this.retires },
         ];
 
-        // ── 2. Compter total réel via un 2e appel léger ──
-        this.equipmentService.getEquipment(0, 1).subscribe();
-        this.totalEquipments = equipments.length; // affiché tel quel
-
-        this.assignesPct = this.totalEquipments > 0
-          ? Math.round((this.assignes / this.totalEquipments) * 100) : 0;
-
         this.loading = false;
         this.cdr.detectChanges();
 
-        // Charts hors zone Angular pour ne pas bloquer l'UI
         this.zone.runOutsideAngular(() => {
-          requestAnimationFrame(() => {
-            this.buildCharts();
-          });
+          requestAnimationFrame(() => { this.buildCharts(); });
         });
       },
       error: () => { this.loading = false; }
     });
 
-    // ── 3. Employés et emplacements — juste le count ──
-    this.employeeService.getEmployees(0, 1).subscribe({
-      next: () => {}
-    });
+    // ── Employés ──
     this.employeeService.getEmployees(0, 500).subscribe({
-      next: (data) => {
+      next: (data: any[]) => {
         this.totalEmployees = data.length;
         this.cdr.detectChanges();
       }
     });
 
+    // ── Emplacements ──
     this.emplacementService.getEmplacements(0, 100).subscribe({
-      next: (data) => {
+      next: (data: any[]) => {
         this.totalEmplacements = data.length;
         this.cdr.detectChanges();
       }

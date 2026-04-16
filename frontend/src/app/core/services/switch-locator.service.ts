@@ -6,8 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class SwitchLocatorService {
-  private apiUrl = '/nb_pcs';
-
+  private apiUrl = '/api/v1/equipment/nb_pcs/online';
 
   constructor(private http: HttpClient) {}
 

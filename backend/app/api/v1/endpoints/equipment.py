@@ -93,3 +93,13 @@ def unassign_equipment(equipment_id: int, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(equipment)
     return equipment
+
+@router.get("/nb_pcs/online")
+def get_nb_pcs_online(db: Session = Depends(get_db)):
+    """Retourne le nombre de PCs (pc + laptop) assignés = en ligne"""
+    from sqlalchemy import func
+    nb = db.query(func.count(EquipmentModel.id)).filter(
+        EquipmentModel.equipment_type.in_(["pc", "laptop"]),
+        EquipmentModel.status == "assigned"
+    ).scalar()
+    return {"nb_pcs": nb or 0}
