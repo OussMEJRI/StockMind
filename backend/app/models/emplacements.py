@@ -1,18 +1,17 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
 from app.db.session import Base
 
 
 class Emplacement(Base):
-    __tablename__ = "emplacements"
+    # We keep the Python class name "Emplacement" for the app,
+    # but map it to the real DB table: locations
+    __tablename__ = "locations"
 
     id = Column(Integer, primary_key=True, index=True)
-    site = Column(String(100), nullable=False)
-    etage = Column(String(50), nullable=False)
-    rosace = Column(String(50), nullable=False)
-    exact_position = Column(String(255), nullable=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    site = Column(String, nullable=False, index=True)
+    etage = Column("floor", String, nullable=False, index=True)
+    rosace = Column("room", String, nullable=False, index=True)
+    exact_position = Column(String, nullable=True)
 
     equipments = relationship("Equipment", back_populates="emplacement")

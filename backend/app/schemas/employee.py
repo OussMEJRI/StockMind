@@ -5,7 +5,7 @@ from typing import Optional
 class EmployeeBase(BaseModel):
     name: str
     email: EmailStr
-    cuid: str
+    cuid: Optional[str] = None
     contract_type: Optional[str] = None
     department: Optional[str] = None
 
@@ -23,7 +23,6 @@ class EmployeeUpdate(BaseModel):
 
 
 class Employee(EmployeeBase):
-    """Schéma de réponse (alias EmployeeResponse)"""
     id: int
 
     class Config:

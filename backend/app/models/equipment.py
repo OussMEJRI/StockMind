@@ -6,26 +6,22 @@ import enum
 
 
 class EquipmentType(str, enum.Enum):
-    LAPTOP = "laptop"
-    PC = "pc"
-    MONITOR = "monitor"
-    PHONE = "phone"
-    PRINTER = "printer"
-    OTHER = "other"
+    PC = "PC"
+    LAPTOP = "LAPTOP"
+    MONITOR = "MONITOR"
+    PHONE = "PHONE"
+    ACCESSORY = "ACCESSORY"
 
 
 class EquipmentCondition(str, enum.Enum):
-    NEW = "new"
-    GOOD = "good"
-    FAIR = "fair"
-    POOR = "poor"
+    NEW = "NEW"
+    USED = "USED"
+    OUT_OF_SERVICE = "OUT_OF_SERVICE"
 
 
 class EquipmentStatus(str, enum.Enum):
-    IN_STOCK = "in_stock"
-    ASSIGNED = "assigned"
-    MAINTENANCE = "maintenance"
-    RETIRED = "retired"
+    IN_STOCK = "IN_STOCK"
+    ASSIGNED = "ASSIGNED"
 
 
 class Equipment(Base):
@@ -36,18 +32,18 @@ class Equipment(Base):
     model = Column(String(255), nullable=False)
     equipment_type = Column(String(50), nullable=False)
     condition = Column(String(50), nullable=False)
-    status = Column(String(50), nullable=False, default="in_stock")
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
+    status = Column(String(50), nullable=False, default="IN_STOCK")
+    created_at = Column(DateTime(timezone=False), nullable=False, default=func.now())
+    updated_at = Column(DateTime(timezone=False), nullable=False, default=func.now(), onupdate=func.now())
 
-    # FK vers Emplacement
-    emplacement_id = Column(Integer, ForeignKey("emplacements.id"), nullable=True)
+    # Keep Python/API name "emplacement_id", but map it to the real DB column "location_id"
+    emplacement_id = Column("location_id", Integer, ForeignKey("locations.id"), nullable=True)
     emplacement = relationship("Emplacement", back_populates="equipments")
 
-    # FK vers Employee
     employee_id = Column(Integer, ForeignKey("employees.id"), nullable=True)
-    employee = relationship("Employee", back_populates="equipments")
+    assigned_to_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
-    # Relations mouvements et historique
+    employee = relationship("Employee", back_populates="equipments")
     movements = relationship("EquipmentMovement", back_populates="equipment")
     assignment_history = relationship("EmployeeEquipmentHistory", back_populates="equipment")
+    

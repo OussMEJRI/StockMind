@@ -43,21 +43,29 @@ export class EquipmentService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  // ✅ Assigner un équipement à un employé
-  assignEquipment(equipmentId: number, employeeId: number): Observable<Equipment> {
-    return this.http.put<Equipment>(`${this.apiUrl}/${equipmentId}`, {
-      employee_id: employeeId,
-      status: 'assigned'
-    });
-  }
+assignEquipmentToEmployee(equipmentId: number, employeeId: number): Observable<Equipment> {
+  return this.http.put<Equipment>(`${this.apiUrl}/${equipmentId}`, {
+    employee_id: employeeId,
+    emplacement_id: null,
+    status: 'assigned'
+  });
+}
 
-  // ✅ Désassigner un équipement
-  unassignEquipment(equipmentId: number): Observable<Equipment> {
-    return this.http.put<Equipment>(`${this.apiUrl}/${equipmentId}`, {
-      employee_id: null,
-      status: 'in_stock'
-    });
-  }
+assignEquipmentToEmplacement(equipmentId: number, emplacementId: number): Observable<Equipment> {
+  return this.http.put<Equipment>(`${this.apiUrl}/${equipmentId}`, {
+    emplacement_id: emplacementId,
+    employee_id: null,
+    status: 'assigned'
+  });
+}
+
+unassignEquipment(equipmentId: number): Observable<Equipment> {
+  return this.http.put<Equipment>(`${this.apiUrl}/${equipmentId}`, {
+    employee_id: null,
+    emplacement_id: null,
+    status: 'in_stock'
+  });
+}
 
   // ✅ Import Excel via l'API backend
   importExcel(file: File, token: string): Observable<any> {

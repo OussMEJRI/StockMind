@@ -1,14 +1,15 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import * as XLSX from 'xlsx';
 import { EmployeeService } from '../../../core/services/employee.service';
-import { Employee, EquipmentHistory } from '../../../core/models/employee.model';
+import { Employee, EquipmentHistory, Department, DepartmentLabels } from '../../../core/models/employee.model';
 
 @Component({
   selector: 'app-employee-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="page-container">
       <div class="page-header">
@@ -29,6 +30,37 @@ import { Employee, EquipmentHistory } from '../../../core/models/employee.model'
       </div>
 
       <div class="alert alert-danger" *ngIf="error">{{ error }}</div>
+      <div class="filters-card">
+  <div class="filters-row">
+    <div class="form-group">
+      <label>Département</label>
+      <select [(ngModel)]="filterDepartment" (change)="loadEmployees()">
+        <option value="">Tous les départements</option>
+        <option *ngFor="let dept of departments" [value]="dept">
+          {{ getDepartmentLabel(dept) }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group search-group">
+      <label>Recherche Nom / CUID</label>
+      <input
+        type="text"
+        [(ngModel)]="filterSearch"
+        (keyup.enter)="loadEmployees()"
+        placeholder="Ex: Oussama ou AAAA1111"
+      />
+    </div>
+
+    <button class="btn btn-secondary" (click)="loadEmployees()">
+      🔍 Rechercher
+    </button>
+
+    <button class="btn btn-secondary" (click)="clearFilters()">
+      🔄 Réinitialiser
+    </button>
+  </div>
+</div>
 
       <div class="table-card">
         <table class="table">
@@ -179,6 +211,48 @@ import { Employee, EquipmentHistory } from '../../../core/models/employee.model'
     }
 
     .header-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+
+    .filters-card {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.filters-row {
+  display: flex;
+  gap: 0.8rem;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-group label {
+  font-size: 0.8rem;
+  color: #8b949e;
+  font-weight: 500;
+}
+
+.form-group select,
+.form-group input {
+  padding: 0.55rem 0.8rem;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  background: #0d1117;
+  color: #e6edf3;
+  font-size: 0.9rem;
+  min-width: 180px;
+}
+
+.search-group input {
+  min-width: 260px;
+}
 
     /* ─── Buttons ─── */
     .btn {
@@ -420,7 +494,11 @@ export class EmployeeListComponent implements OnInit {
   employees: Employee[] = [];
   error = '';
   openMenuId: number | null = null;
+  departments = Object.values(Department);
+  departmentLabels = DepartmentLabels;
 
+  filterDepartment = '';
+  filterSearch = '';
   showHistoryModal = false;
   selectedEmployee: Employee | null = null;
   history: EquipmentHistory[] = [];
@@ -445,15 +523,33 @@ export class EmployeeListComponent implements OnInit {
   closeMenu(): void { this.openMenuId = null; }
 
   /* ─── CRUD ─── */
-  loadEmployees(): void {
-    this.employeeService.getEmployees(0, 100).subscribe({
-      next: (data) => { this.employees = data; },
-      error: (err) => {
-        this.error = 'Erreur lors du chargement des employés';
-        console.error(err);
-      }
-    });
-  }
+loadEmployees(): void {
+  const filters: any = {};
+
+  if (this.filterDepartment) filters.department = this.filterDepartment;
+  if (this.filterSearch.trim()) filters.search = this.filterSearch.trim();
+
+  this.employeeService.getEmployees(0, 100, filters).subscribe({
+    next: (data) => {
+      this.employees = data;
+      this.error = '';
+    },
+    error: (err) => {
+      this.employees = [];
+      this.error = 'Erreur lors du chargement des employés';
+      console.error(err);
+    }
+  });
+}
+clearFilters(): void {
+  this.filterDepartment = '';
+  this.filterSearch = '';
+  this.loadEmployees();
+}
+
+getDepartmentLabel(dept: string): string {
+  return this.departmentLabels[dept as Department] || dept;
+}
 
   viewHistory(employee: Employee): void {
     this.selectedEmployee = employee;

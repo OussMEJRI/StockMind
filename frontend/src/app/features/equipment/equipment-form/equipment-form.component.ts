@@ -203,7 +203,7 @@ export class EquipmentFormComponent implements OnInit {
       model: ['', Validators.required],
       equipment_type: ['', Validators.required],
       condition: ['', Validators.required],
-      status: ['', [Validators.required]]
+      status: [EquipmentStatus.IN_STOCK, [Validators.required]]
     });
 
     const id = this.route.snapshot.params['id'];
@@ -239,9 +239,22 @@ export class EquipmentFormComponent implements OnInit {
     request.subscribe({
       next: () => { this.router.navigate(['/equipment']); },
       error: (err) => {
-        this.error = err.message || "Erreur lors de l'enregistrement";
-        this.loading = false;
-      }
+  const detail = err?.error?.detail;
+
+  if (typeof detail === 'string') {
+    this.error = detail;
+  } else if (Array.isArray(detail)) {
+    this.error = detail.map((d: any) => d?.msg || JSON.stringify(d)).join(' | ');
+  } else if (typeof err?.error === 'string') {
+    this.error = err.error;
+  } else if (typeof err?.message === 'string') {
+    this.error = err.message;
+  } else {
+    this.error = "Erreur lors de l'enregistrement";
+  }
+
+  this.loading = false;
+}
     });
   }
 
