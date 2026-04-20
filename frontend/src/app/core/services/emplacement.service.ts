@@ -32,6 +32,10 @@ export class EmplacementService {
     return this.http.put<Emplacement>(`${this.apiUrl}/${id}`, emplacement);
   }
 
+  
+  getEquipmentsByEmplacement(emplacementId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${emplacementId}/equipments`);
+  }
   deleteEmplacement(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }

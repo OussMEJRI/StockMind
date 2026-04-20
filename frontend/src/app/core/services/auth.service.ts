@@ -1,74 +1,82 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { User, LoginRequest, TokenResponse } from '../models/user.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+export interface CurrentUser {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  role: 'admin' | 'gestionnaire' | 'collaborateur';
+  is_active: boolean;
+}
+
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  private currentUserSubject: BehaviorSubject<User | null>;
-  public currentUser: Observable<User | null>;
   private apiUrl = `${environment.apiUrl}/api/v1/auth`;
+  private currentUserSubject = new BehaviorSubject<CurrentUser | null>(null);
 
-  constructor(
-    private http: HttpClient,
-    private router: Router
-  ) {
-    const storedUser = localStorage.getItem('currentUser');
-    this.currentUserSubject = new BehaviorSubject<User | null>(
-      storedUser ? JSON.parse(storedUser) : null
+  currentUser$      = this.currentUserSubject.asObservable();
+
+  constructor(private http: HttpClient) {
+    if (this.getToken()) {
+      this.loadCurrentUser().subscribe({ error: () => this.logout() });
+    }
+  }
+
+  login(email: string, password: string): Observable<any> {
+    const body = new URLSearchParams();
+    body.set('username', email);
+    body.set('password', password);
+    return this.http.post<any>(`${this.apiUrl}/login`, body.toString(), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    }).pipe(
+      tap(res => {
+        localStorage.setItem('token', res.access_token);
+        this.loadCurrentUser().subscribe();
+      })
     );
-    this.currentUser = this.currentUserSubject.asObservable();
   }
 
-  public get currentUserValue(): User | null {
-    return this.currentUserSubject.value;
-  }
-
-  login(email: string, password: string): Observable<TokenResponse> {
-    const formData = new FormData();
-    formData.append('username', email);
-    formData.append('password', password);
-
-    return this.http.post<TokenResponse>(`${this.apiUrl}/login`, formData)
-      .pipe(
-        tap(response => {
-          localStorage.setItem('token', response.access_token);
-          this.getCurrentUser().subscribe();
-        })
-      );
-  }
-
-  getCurrentUser(): Observable<User> {
-    return this.http.get<User>(`${this.apiUrl}/me`)
-      .pipe(
-        tap(user => {
-          localStorage.setItem('currentUser', JSON.stringify(user));
-          this.currentUserSubject.next(user);
-        })
-      );
+  loadCurrentUser(): Observable<CurrentUser> {
+    return this.http.get<CurrentUser>(`${this.apiUrl}/me`).pipe(
+      tap(user => this.currentUserSubject.next(user))
+    );
   }
 
   logout(): void {
     localStorage.removeItem('token');
-    localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
-    this.router.navigate(['/login']);
-  }
-
-  isAuthenticated(): boolean {
-    return !!localStorage.getItem('token');
   }
 
   getToken(): string | null {
     return localStorage.getItem('token');
   }
 
-  hasRole(roles: string[]): boolean {
-    const user = this.currentUserValue;
-    return user ? roles.includes(user.role) : false;
+  // ✅ Alias utilisé par la navbar
+  get currentUserValue(): CurrentUser | null {
+    return this.currentUserSubject.value;
+  }
+
+  get currentUser(): CurrentUser | null {
+    return this.currentUserSubject.value;
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.getToken();
+  }
+
+  isAdmin(): boolean {
+    return this.currentUserValue?.role === 'admin';
+  }
+
+  isGestionnaire(): boolean {
+    return this.currentUserValue?.role === 'gestionnaire';
+  }
+
+  // ✅ Seul l'admin peut supprimer
+  canDelete(): boolean {
+    return this.isAdmin();
   }
 }

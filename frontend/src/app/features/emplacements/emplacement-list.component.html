@@ -69,6 +69,11 @@
           <td>{{ emp.exact_position || '-' }}</td>
           <td>
             <div class="action-buttons">
+              <button class="btn btn-sm btn-secondary"
+                      (click)="openEquipmentPopup(emp)"
+                      title="Voir les équipements">
+                🖥️ Équipements
+              </button>
               <button class="btn btn-sm btn-info"
                       (click)="editEmplacement(emp.id!)">
                 ✏️ Modifier
@@ -106,6 +111,78 @@
               [disabled]="(currentPage + 1) * pageSize >= totalItems"
               (click)="onPageChange({pageIndex: currentPage + 1, pageSize: pageSize})">
         Suivant →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ POPUP ÉQUIPEMENTS -->
+<div class="popup-overlay" *ngIf="showEquipmentPopup" (click)="closeEquipmentPopup()">
+  <div class="popup-container" (click)="$event.stopPropagation()">
+
+    <div class="popup-header">
+      <h3>🖥️ Équipements — Rosace {{ selectedEmplacement?.rosace }}</h3>
+      <span class="popup-subtitle">
+        {{ selectedEmplacement?.site }} | {{ selectedEmplacement?.etage }}
+      </span>
+      <button class="popup-close" (click)="closeEquipmentPopup()">✕</button>
+    </div>
+
+    <div class="popup-body">
+
+      <!-- Chargement -->
+      <div *ngIf="equipmentLoading" class="popup-loading">
+        <div class="spinner"></div>
+        <span>Chargement des équipements...</span>
+      </div>
+
+      <!-- Erreur -->
+      <div *ngIf="equipmentError" class="alert alert-danger">
+        ⚠️ {{ equipmentError }}
+      </div>
+
+      <!-- Liste équipements -->
+      <div *ngIf="!equipmentLoading && !equipmentError">
+        <div *ngIf="equipmentList.length === 0" class="no-data">
+          Aucun équipement assigné à cette rosace.
+        </div>
+
+        <table class="table" *ngIf="equipmentList.length > 0">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Modèle</th>
+              <th>N° Série</th>
+              <th>État</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let eq of equipmentList">
+              <td>
+                {{ getTypeIcon(eq.equipment_type) }} {{ eq.equipment_type }}
+              </td>
+              <td>{{ eq.model }}</td>
+              <td><code>{{ eq.serial_number }}</code></td>
+              <td>{{ eq.condition }}</td>
+              <td>
+                <span class="badge" [ngClass]="getStatusClass(eq.status)">
+                  {{ getStatusLabel(eq.status) }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="popup-footer-info" *ngIf="equipmentList.length > 0">
+          Total : <strong>{{ equipmentList.length }}</strong> équipement(s)
+        </div>
+      </div>
+    </div>
+
+    <div class="popup-footer">
+      <button class="btn btn-outline" (click)="closeEquipmentPopup()">
+        Fermer
       </button>
     </div>
   </div>

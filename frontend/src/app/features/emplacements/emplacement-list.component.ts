@@ -30,6 +30,13 @@ export class EmplacementListComponent implements OnInit {
   pageSize = 10;
   totalItems = 0;
 
+  // Popup équipements
+  showEquipmentPopup = false;
+  selectedEmplacement: Emplacement | null = null;
+  equipmentList: any[] = [];
+  equipmentLoading = false;
+  equipmentError: string | null = null;
+
   constructor(
     private emplacementService: EmplacementService,
     private router: Router
@@ -80,7 +87,6 @@ export class EmplacementListComponent implements OnInit {
     this.loadEmplacements();
   }
 
-  // ✅ Méthode pour la pagination dans le template
   getTotalPages(): number {
     return Math.ceil(this.totalItems / this.pageSize);
   }
@@ -108,5 +114,63 @@ export class EmplacementListComponent implements OnInit {
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
     this.loadEmplacements();
+  }
+
+  // ✅ Popup équipements
+  openEquipmentPopup(emp: Emplacement): void {
+    this.selectedEmplacement = emp;
+    this.showEquipmentPopup = true;
+    this.equipmentList = [];
+    this.equipmentError = null;
+    this.equipmentLoading = true;
+
+    this.emplacementService.getEquipmentsByEmplacement(emp.id!).subscribe({
+      next: (data) => {
+        this.equipmentList = data;
+        this.equipmentLoading = false;
+      },
+      error: () => {
+        this.equipmentError = 'Erreur lors du chargement des équipements';
+        this.equipmentLoading = false;
+      }
+    });
+  }
+
+  closeEquipmentPopup(): void {
+    this.showEquipmentPopup = false;
+    this.selectedEmplacement = null;
+    this.equipmentList = [];
+  }
+
+  getTypeIcon(type: string): string {
+    const icons: Record<string, string> = {
+      'LAPTOP': '💻',
+      'PC': '🖥️',
+      'MONITOR': '🖵',
+      'PRINTER': '🖨️',
+      'PHONE': '📱',
+      'ACCESSORY': '🔌'
+    };
+    return icons[type] || '📦';
+  }
+
+  getStatusLabel(status: string): string {
+    const labels: Record<string, string> = {
+      'ASSIGNED': 'Assigné',
+      'IN_STOCK': 'En stock',
+      'MAINTENANCE': 'En maintenance',
+      'RETIRED': 'Retiré'
+    };
+    return labels[status] || status;
+  }
+
+  getStatusClass(status: string): string {
+    const classes: Record<string, string> = {
+      'ASSIGNED': 'badge-success',
+      'IN_STOCK': 'badge-info',
+      'MAINTENANCE': 'badge-warning',
+      'RETIRED': 'badge-danger'
+    };
+    return classes[status] || 'badge-secondary';
   }
 }
