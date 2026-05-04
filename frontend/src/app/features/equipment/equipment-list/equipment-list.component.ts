@@ -6,6 +6,7 @@ import { EquipmentService } from '../../../core/services/equipment.service';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { EmplacementService } from '../../../core/services/emplacement.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Employee } from '../../../core/models/employee.model';
 import { Emplacement } from '../../../core/models/emplacement.model';
 import {
@@ -51,6 +52,7 @@ import {
               </option>
             </select>
           </div>
+
           <div class="form-group">
             <label>Statut</label>
             <select [(ngModel)]="filterStatus" (change)="loadEquipment()">
@@ -61,6 +63,7 @@ import {
               <option value="retired">Retiré</option>
             </select>
           </div>
+
           <div class="form-group">
             <label>État</label>
             <select [(ngModel)]="filterCondition" (change)="loadEquipment()">
@@ -71,19 +74,20 @@ import {
               <option value="poor">Mauvais état</option>
             </select>
           </div>
-           <div class="form-group search-group">
-    <label>Recherche N° série</label>
-    <input
-      type="text"
-      [(ngModel)]="filterSearch"
-      (keyup.enter)="loadEquipment()"
-      placeholder="Ex: SN-2024-001"
-    />
-  </div>
 
-  <button class="btn btn-primary" (click)="loadEquipment()">
-    🔍 Rechercher
-  </button>
+          <div class="form-group search-group">
+            <label>Recherche N° série</label>
+            <input
+              type="text"
+              [(ngModel)]="filterSearch"
+              (keyup.enter)="loadEquipment()"
+              placeholder="Ex: SN-2024-001"
+            />
+          </div>
+
+          <button class="btn btn-primary" (click)="loadEquipment()">
+            🔍 Rechercher
+          </button>
 
           <button class="btn btn-outline" (click)="clearFilters()">
             🔄 Réinitialiser
@@ -120,63 +124,77 @@ import {
               <th>Actions</th>
             </tr>
           </thead>
+
           <tbody>
             <tr *ngFor="let eq of equipment">
-              <td><code>{{ eq.serial_number }}</code></td>
+              <td>
+                <code>{{ eq.serial_number }}</code>
+              </td>
+
               <td>{{ eq.model }}</td>
+
               <td>
                 <span class="type-badge">
                   {{ getTypeIcon(eq.equipment_type) }}
                   {{ getTypeName(eq.equipment_type) }}
                 </span>
               </td>
+
               <td>
                 <span class="badge" [ngClass]="getConditionBadge(eq.condition)">
                   {{ getConditionName(eq.condition) }}
                 </span>
               </td>
+
               <td>
                 <span class="badge" [ngClass]="getStatusBadge(eq.status)">
                   {{ getStatusName(eq.status) }}
                 </span>
               </td>
+
               <td>
-  <span *ngIf="eq.employee_id" class="employee-info">
-    👤 {{ getEmployeeName(eq.employee_id) }}
-  </span>
-  <span *ngIf="!eq.employee_id && eq.emplacement_id" class="employee-info">
-    📍 {{ getEmplacementName(eq.emplacement_id) }}
-  </span>
-  <span *ngIf="!eq.employee_id && !eq.emplacement_id" class="text-muted">
-    Non assigné
-  </span>
-</td>
+                <span *ngIf="eq.employee_id" class="employee-info">
+                  👤 {{ getEmployeeName(eq.employee_id) }}
+                </span>
+
+                <span *ngIf="!eq.employee_id && eq.emplacement_id" class="employee-info">
+                  📍 {{ getEmplacementName(eq.emplacement_id) }}
+                </span>
+
+                <span *ngIf="!eq.employee_id && !eq.emplacement_id" class="text-muted">
+                  Non assigné
+                </span>
+              </td>
+
               <td>
-  <div class="action-buttons">
-    <button
-      *ngIf="!eq.employee_id && !eq.emplacement_id"
-      class="btn btn-sm btn-success"
-      (click)="openAssignModal(eq)">
-      ➕ Affecter
-    </button>
+                <div class="action-buttons">
+                  <button
+                    *ngIf="!eq.employee_id && !eq.emplacement_id"
+                    class="btn btn-sm btn-success"
+                    (click)="openAssignModal(eq)"
+                  >
+                    ➕ Affecter
+                  </button>
 
-    <button
-      *ngIf="eq.employee_id || eq.emplacement_id"
-      class="btn btn-sm btn-warning"
-      (click)="unassign(eq)">
-      ➖ Retirer
-    </button>
+                  <button
+                    *ngIf="eq.employee_id || eq.emplacement_id"
+                    class="btn btn-sm btn-warning"
+                    (click)="unassign(eq)"
+                  >
+                    ➖ Retirer
+                  </button>
 
-    <button class="btn btn-sm btn-info" (click)="edit(eq)">
-      ✏️ Modifier
-    </button>
+                  <button class="btn btn-sm btn-info" (click)="edit(eq)">
+                    ✏️ Modifier
+                  </button>
 
-    <button class="btn btn-sm btn-danger" (click)="delete(eq)">
-      🗑️ Supprimer
-    </button>
-  </div>
-</td>
+                  <button class="btn btn-sm btn-danger" (click)="delete(eq)">
+                    🗑️ Supprimer
+                  </button>
+                </div>
+              </td>
             </tr>
+
             <tr *ngIf="equipment.length === 0">
               <td colspan="7" class="no-data">
                 Aucun équipement trouvé
@@ -193,425 +211,428 @@ import {
             <h3>👤 Assigner un équipement</h3>
             <button class="close-btn" (click)="closeAssignModal()">✕</button>
           </div>
-         <div class="modal-body">
-  <p>
-    <strong>Équipement :</strong>
-    {{ selectedEquipment?.model }} ({{ selectedEquipment?.serial_number }})
-  </p>
 
-  <div class="form-group" *ngIf="selectedEquipment && isLaptop(selectedEquipment)">
-    <label>Sélectionner un employé</label>
-    <select [(ngModel)]="selectedEmployeeId">
-      <option [ngValue]="null">-- Choisir un employé --</option>
-      <option *ngFor="let emp of employees" [ngValue]="emp.id">
-        {{ emp.name }}<span *ngIf="emp.cuid"> ({{ emp.cuid }})</span>
-      </option>
-    </select>
-  </div>
+          <div class="modal-body">
+            <p>
+              <strong>Équipement :</strong>
+              {{ selectedEquipment?.model }} ({{ selectedEquipment?.serial_number }})
+            </p>
 
-  <div class="form-group" *ngIf="selectedEquipment && !isLaptop(selectedEquipment)">
-    <label>Sélectionner un emplacement</label>
-    <select [(ngModel)]="selectedEmplacementId">
-      <option [ngValue]="null">-- Choisir un emplacement --</option>
-      <option *ngFor="let emp of emplacements" [ngValue]="emp.id">
-        {{ formatEmplacement(emp) }}
-      </option>
-    </select>
-  </div>
-</div>
+            <div class="form-group" *ngIf="selectedEquipment && isLaptop(selectedEquipment)">
+              <label>Sélectionner un employé</label>
+              <select [(ngModel)]="selectedEmployeeId">
+                <option [ngValue]="null">-- Choisir un employé --</option>
+                <option *ngFor="let emp of employees" [ngValue]="emp.id">
+                  {{ emp.name }}<span *ngIf="emp.cuid"> ({{ emp.cuid }})</span>
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group" *ngIf="selectedEquipment && !isLaptop(selectedEquipment)">
+              <label>Sélectionner un emplacement</label>
+              <select [(ngModel)]="selectedEmplacementId">
+                <option [ngValue]="null">-- Choisir un emplacement --</option>
+                <option *ngFor="let emp of emplacements" [ngValue]="emp.id">
+                  {{ formatEmplacement(emp) }}
+                </option>
+              </select>
+            </div>
+          </div>
+
           <div class="modal-footer">
             <button class="btn btn-secondary" (click)="closeAssignModal()">
               Annuler
             </button>
+
             <button
-  class="btn btn-primary"
-  [disabled]="isLaptop(selectedEquipment) ? !selectedEmployeeId : !selectedEmplacementId"
-  (click)="confirmAssign()">
-  ✅ Confirmer
-</button>
+              class="btn btn-primary"
+              [disabled]="isLaptop(selectedEquipment) ? !selectedEmployeeId : !selectedEmplacementId"
+              (click)="confirmAssign()"
+            >
+              ✅ Confirmer
+            </button>
           </div>
         </div>
       </div>
     </div>
   `,
   styles: [`
-  .page-container {
-    padding: 1.5rem 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
-    background: #0d1117;
-    min-height: 100vh;
-  }
+    .page-container {
+      padding: 1.5rem 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      background: #0d1117;
+      min-height: 100vh;
+    }
 
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-  }
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
 
-  .page-header h1 {
-    margin: 0;
-    font-size: 1.4rem;
-    color: #e6edf3;
-    font-weight: 600;
-  }
+    .page-header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: #e6edf3;
+      font-weight: 600;
+    }
 
-  .header-actions {
-    display: flex;
-    gap: 0.7rem;
-    flex-wrap: wrap;
-  }
+    .header-actions {
+      display: flex;
+      gap: 0.7rem;
+      flex-wrap: wrap;
+    }
 
-  .filters-card {
-    background: #161b22;
-    border: 1px solid #21262d;
-    border-radius: 10px;
-    padding: 1rem;
-    margin-bottom: 1.2rem;
-  }
+    .filters-card {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1.2rem;
+    }
 
-  .filter-row {
-    display: flex;
-    gap: 0.8rem;
-    align-items: end;
-    flex-wrap: wrap;
-  }
+    .filter-row {
+      display: flex;
+      gap: 0.8rem;
+      align-items: end;
+      flex-wrap: wrap;
+    }
 
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
 
-  .form-group label {
-    font-size: 0.8rem;
-    color: #8b949e;
-    font-weight: 500;
-  }
+    .form-group label {
+      font-size: 0.8rem;
+      color: #8b949e;
+      font-weight: 500;
+    }
 
-  .form-group select,
-  .form-group input {
-    padding: 0.55rem 0.8rem;
-    border: 1px solid #30363d;
-    border-radius: 6px;
-    background: #0d1117;
-    color: #e6edf3;
-    font-size: 0.9rem;
-    min-width: 180px;
-  }
+    .form-group select,
+    .form-group input {
+      padding: 0.55rem 0.8rem;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      background: #0d1117;
+      color: #e6edf3;
+      font-size: 0.9rem;
+      min-width: 180px;
+    }
 
-  .form-group select:focus,
-  .form-group input:focus {
-    outline: none;
-    border-color: #388bfd;
-    box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.15);
-  }
+    .form-group select:focus,
+    .form-group input:focus {
+      outline: none;
+      border-color: #388bfd;
+      box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.15);
+    }
 
-  .table-card {
-    background: #161b22;
-    border: 1px solid #21262d;
-    border-radius: 10px;
-    overflow: hidden;
-  }
+    .table-card {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 10px;
+      overflow: hidden;
+    }
 
-  .table {
-    width: 100%;
-    border-collapse: collapse;
-  }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
 
-  .table th {
-    padding: 0.7rem 1rem;
-    background: #0d1117;
-    font-weight: 600;
-    font-size: 0.72rem;
-    color: #8b949e;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    border-bottom: 1px solid #21262d;
-    text-align: left;
-  }
+    .table th {
+      padding: 0.7rem 1rem;
+      background: #0d1117;
+      font-weight: 600;
+      font-size: 0.72rem;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border-bottom: 1px solid #21262d;
+      text-align: left;
+    }
 
-  .table td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #21262d;
-    font-size: 0.85rem;
-    color: #c9d1d9;
-  }
+    .table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #21262d;
+      font-size: 0.85rem;
+      color: #c9d1d9;
+    }
 
-  .table tbody tr:last-child td {
-    border-bottom: none;
-  }
+    .table tbody tr:last-child td {
+      border-bottom: none;
+    }
 
-  .table tbody tr:hover {
-    background: #1c2128;
-  }
+    .table tbody tr:hover {
+      background: #1c2128;
+    }
 
-  code {
-    background: #21262d;
-    color: #c9d1d9;
-    padding: 3px 8px;
-    border-radius: 6px;
-    font-size: 0.82rem;
-  }
+    code {
+      background: #21262d;
+      color: #c9d1d9;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+    }
 
-  .type-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: #c9d1d9;
-  }
+    .type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #c9d1d9;
+    }
 
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.28rem 0.75rem;
-    border-radius: 999px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    border: 1px solid transparent;
-  }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.28rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
 
-  .badge-success {
-    background: rgba(57, 211, 83, 0.12);
-    border-color: rgba(57, 211, 83, 0.35);
-    color: #39d353;
-  }
+    .badge-success {
+      background: rgba(57, 211, 83, 0.12);
+      border-color: rgba(57, 211, 83, 0.35);
+      color: #39d353;
+    }
 
-  .badge-info {
-    background: rgba(56, 139, 253, 0.12);
-    border-color: rgba(56, 139, 253, 0.35);
-    color: #58a6ff;
-  }
+    .badge-info {
+      background: rgba(56, 139, 253, 0.12);
+      border-color: rgba(56, 139, 253, 0.35);
+      color: #58a6ff;
+    }
 
-  .badge-warning {
-    background: rgba(210, 153, 34, 0.12);
-    border-color: rgba(210, 153, 34, 0.35);
-    color: #d29922;
-  }
+    .badge-warning {
+      background: rgba(210, 153, 34, 0.12);
+      border-color: rgba(210, 153, 34, 0.35);
+      color: #d29922;
+    }
 
-  .badge-danger {
-    background: rgba(248, 81, 73, 0.12);
-    border-color: rgba(248, 81, 73, 0.35);
-    color: #f85149;
-  }
+    .badge-danger {
+      background: rgba(248, 81, 73, 0.12);
+      border-color: rgba(248, 81, 73, 0.35);
+      color: #f85149;
+    }
 
-  .badge-secondary {
-    background: rgba(139, 148, 158, 0.12);
-    border-color: rgba(139, 148, 158, 0.35);
-    color: #8b949e;
-  }
+    .badge-secondary {
+      background: rgba(139, 148, 158, 0.12);
+      border-color: rgba(139, 148, 158, 0.35);
+      color: #8b949e;
+    }
 
-  .action-buttons {
-    display: flex;
-    gap: 0.45rem;
-    flex-wrap: wrap;
-  }
+    .action-buttons {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
 
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.45rem 1rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: 1px solid transparent;
-    font-family: inherit;
-  }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.45rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+      font-family: inherit;
+    }
 
-  .btn-primary {
-    background: rgba(56, 139, 253, 0.15);
-    border-color: rgba(56, 139, 253, 0.35);
-    color: #58a6ff;
-  }
+    .btn-primary {
+      background: rgba(56, 139, 253, 0.15);
+      border-color: rgba(56, 139, 253, 0.35);
+      color: #58a6ff;
+    }
 
-  .btn-secondary {
-    background: #21262d;
-    border-color: #30363d;
-    color: #e6edf3;
-  }
+    .btn-secondary {
+      background: #21262d;
+      border-color: #30363d;
+      color: #e6edf3;
+    }
 
-  .btn-success {
-    background: rgba(57, 211, 83, 0.15);
-    border-color: rgba(57, 211, 83, 0.35);
-    color: #39d353;
-  }
+    .btn-success {
+      background: rgba(57, 211, 83, 0.15);
+      border-color: rgba(57, 211, 83, 0.35);
+      color: #39d353;
+    }
 
-  .btn-warning {
-    background: rgba(210, 153, 34, 0.15);
-    border-color: rgba(210, 153, 34, 0.35);
-    color: #d29922;
-  }
+    .btn-warning {
+      background: rgba(210, 153, 34, 0.15);
+      border-color: rgba(210, 153, 34, 0.35);
+      color: #d29922;
+    }
 
-  .btn-danger {
-    background: rgba(248, 81, 73, 0.15);
-    border-color: rgba(248, 81, 73, 0.35);
-    color: #f85149;
-  }
+    .btn-danger {
+      background: rgba(248, 81, 73, 0.15);
+      border-color: rgba(248, 81, 73, 0.35);
+      color: #f85149;
+    }
 
-  .btn-info {
-    background: rgba(56, 139, 253, 0.15);
-    border-color: rgba(56, 139, 253, 0.35);
-    color: #58a6ff;
-  }
+    .btn-info {
+      background: rgba(56, 139, 253, 0.15);
+      border-color: rgba(56, 139, 253, 0.35);
+      color: #58a6ff;
+    }
 
-  .btn-outline {
-    background: #0d1117;
-    border: 1px solid #30363d;
-    color: #c9d1d9;
-  }
+    .btn-outline {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      color: #c9d1d9;
+    }
 
-  .btn-sm {
-    padding: 0.38rem 0.8rem;
-    font-size: 0.8rem;
-  }
+    .btn-sm {
+      padding: 0.38rem 0.8rem;
+      font-size: 0.8rem;
+    }
 
-  .btn:hover {
-    filter: brightness(1.08);
-  }
+    .btn:hover {
+      filter: brightness(1.08);
+    }
 
-  .btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
-  .employee-info {
-    color: #39d353;
-    font-weight: 500;
-  }
+    .employee-info {
+      color: #39d353;
+      font-weight: 500;
+    }
 
-  .text-muted {
-    color: #8b949e;
-    font-style: italic;
-  }
+    .text-muted {
+      color: #8b949e;
+      font-style: italic;
+    }
 
-  .no-data {
-    text-align: center;
-    padding: 2rem;
-    color: #8b949e;
-  }
+    .no-data {
+      text-align: center;
+      padding: 2rem;
+      color: #8b949e;
+    }
 
-  .loading-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    padding: 2rem;
-    color: #c9d1d9;
-  }
+    .loading-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 2rem;
+      color: #c9d1d9;
+    }
 
-  .spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid #21262d;
-    border-top: 3px solid #388bfd;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #21262d;
+      border-top: 3px solid #388bfd;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
 
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
 
-  .alert {
-    padding: 0.9rem 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    border: 1px solid transparent;
-  }
+    .alert {
+      padding: 0.9rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border: 1px solid transparent;
+    }
 
-  .alert-danger {
-    background: rgba(248, 81, 73, 0.12);
-    border-color: rgba(248, 81, 73, 0.35);
-    color: #ff7b72;
-  }
+    .alert-danger {
+      background: rgba(248, 81, 73, 0.12);
+      border-color: rgba(248, 81, 73, 0.35);
+      color: #ff7b72;
+    }
 
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(1, 4, 9, 0.75);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(1, 4, 9, 0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
 
-  .modal-box {
-    background: #161b22;
-    border: 1px solid #30363d;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 480px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-    color: #e6edf3;
-  }
+    .modal-box {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 480px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      color: #e6edf3;
+    }
 
-  .modal-header {
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid #21262d;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+    .modal-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #21262d;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-  .modal-header h3 {
-    margin: 0;
-    color: #e6edf3;
-  }
+    .modal-header h3 {
+      margin: 0;
+      color: #e6edf3;
+    }
 
-  .close-btn {
-    background: none;
-    border: none;
-    font-size: 1.2rem;
-    cursor: pointer;
-    color: #8b949e;
-  }
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #8b949e;
+    }
 
-  .modal-body {
-    padding: 1.5rem;
-    color: #c9d1d9;
-  }
+    .modal-body {
+      padding: 1.5rem;
+      color: #c9d1d9;
+    }
 
-  .modal-footer {
-    padding: 1rem 1.5rem;
-    border-top: 1px solid #21262d;
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-  }
-`]
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #21262d;
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+  `]
 })
 export class EquipmentListComponent implements OnInit {
   equipment: Equipment[] = [];
   employees: Employee[] = [];
   emplacements: Emplacement[] = [];
-selectedEmplacementId: number | null = null;
+
+  selectedEmplacementId: number | null = null;
   loading = false;
   importing = false;
   error = '';
 
-  // Filtres
   filterType = '';
   filterStatus = '';
   filterCondition = '';
   filterSearch = '';
 
-  // Modal
   showAssignModal = false;
   selectedEquipment: Equipment | null = null;
   selectedEmployeeId: number | null = null;
 
-  // ✅ Enums alignés avec le backend
   equipmentTypes = Object.values(EquipmentType);
 
   constructor(
     private equipmentService: EquipmentService,
     private employeeService: EmployeeService,
     private emplacementService: EmplacementService,
+    private notificationService: NotificationService,
     private authService: AuthService,
     private router: Router
   ) {}
@@ -623,11 +644,13 @@ selectedEmplacementId: number | null = null;
   }
 
   loadEmplacements(): void {
-  this.emplacementService.getEmplacements(0, 100).subscribe({
-    next: (data) => { this.emplacements = data; },
-    error: (err) => console.error('Erreur chargement emplacements:', err)
-  });
-}
+    this.emplacementService.getEmplacements(0, 100).subscribe({
+      next: (data) => {
+        this.emplacements = data;
+      },
+      error: (err) => console.error('Erreur chargement emplacements:', err)
+    });
+  }
 
   loadEquipment(): void {
     this.loading = true;
@@ -639,7 +662,6 @@ selectedEmplacementId: number | null = null;
     if (this.filterCondition) filters.condition = this.filterCondition;
     if (this.filterSearch.trim()) filters.search = this.filterSearch.trim();
 
-    // ✅ Appel correct avec (skip, limit, filters)
     this.equipmentService.getEquipment(0, 100, filters).subscribe({
       next: (data) => {
         this.equipment = data;
@@ -654,9 +676,10 @@ selectedEmplacementId: number | null = null;
   }
 
   loadEmployees(): void {
-    // ✅ Appel correct avec (skip, limit)
     this.employeeService.getEmployees(0, 100).subscribe({
-      next: (data) => { this.employees = data; },
+      next: (data) => {
+        this.employees = data;
+      },
       error: (err) => console.error('Erreur chargement employés:', err)
     });
   }
@@ -669,72 +692,72 @@ selectedEmplacementId: number | null = null;
     this.loadEquipment();
   }
 
-  // ✅ Récupérer le nom de l'employé par ID
   getEmployeeName(employeeId: number): string {
     const emp = this.employees.find(e => e.id === employeeId);
     return emp ? emp.name : `ID: ${employeeId}`;
   }
 
- openAssignModal(equipment: Equipment): void {
-  this.selectedEquipment = equipment;
-  this.selectedEmployeeId = null;
-  this.selectedEmplacementId = null;
-  this.showAssignModal = true;
-}
+  openAssignModal(equipment: Equipment): void {
+    this.selectedEquipment = equipment;
+    this.selectedEmployeeId = null;
+    this.selectedEmplacementId = null;
+    this.showAssignModal = true;
+  }
 
- closeAssignModal(): void {
-  this.showAssignModal = false;
-  this.selectedEquipment = null;
-  this.selectedEmployeeId = null;
-  this.selectedEmplacementId = null;
-}
+  closeAssignModal(): void {
+    this.showAssignModal = false;
+    this.selectedEquipment = null;
+    this.selectedEmployeeId = null;
+    this.selectedEmplacementId = null;
+  }
 
-confirmAssign(): void {
-  if (!this.selectedEquipment?.id) return;
+  confirmAssign(): void {
+    if (!this.selectedEquipment?.id) return;
 
-  const request = this.isLaptop(this.selectedEquipment)
-    ? (
-        this.selectedEmployeeId
-          ? this.equipmentService.assignEquipmentToEmployee(
-              this.selectedEquipment.id,
-              this.selectedEmployeeId
-            )
-          : null
-      )
-    : (
-        this.selectedEmplacementId
-          ? this.equipmentService.assignEquipmentToEmplacement(
-              this.selectedEquipment.id,
-              this.selectedEmplacementId
-            )
-          : null
-      );
+    const request = this.isLaptop(this.selectedEquipment)
+      ? (
+          this.selectedEmployeeId
+            ? this.equipmentService.assignEquipmentToEmployee(
+                this.selectedEquipment.id,
+                this.selectedEmployeeId
+              )
+            : null
+        )
+      : (
+          this.selectedEmplacementId
+            ? this.equipmentService.assignEquipmentToEmplacement(
+                this.selectedEquipment.id,
+                this.selectedEmplacementId
+              )
+            : null
+        );
 
-  if (!request) return;
+    if (!request) return;
 
-  request.subscribe({
-    next: () => {
-      this.closeAssignModal();
-      this.loadEquipment();
-    },
-    error: (err) => {
-      this.error = err?.error?.detail || "Erreur lors de l'affectation";
-      console.error(err);
-    }
-  });
-}
-isLaptop(equipment: Equipment | null): boolean {
-  return String(equipment?.equipment_type || '').toLowerCase() === 'laptop';
-}
+    request.subscribe({
+      next: () => {
+        this.closeAssignModal();
+        this.loadEquipment();
+      },
+      error: (err) => {
+        this.error = err?.error?.detail || "Erreur lors de l'affectation";
+        console.error(err);
+      }
+    });
+  }
 
-getEmplacementName(emplacementId: number): string {
-  const emplacement = this.emplacements.find(e => e.id === emplacementId);
-  return emplacement ? this.formatEmplacement(emplacement) : `ID: ${emplacementId}`;
-}
+  isLaptop(equipment: Equipment | null): boolean {
+    return String(equipment?.equipment_type || '').toLowerCase() === 'laptop';
+  }
 
-formatEmplacement(emplacement: Emplacement): string {
-  return `${emplacement.site} / ${emplacement.etage} / ${emplacement.rosace}`;
-}
+  getEmplacementName(emplacementId: number): string {
+    const emplacement = this.emplacements.find(e => e.id === emplacementId);
+    return emplacement ? this.formatEmplacement(emplacement) : `ID: ${emplacementId}`;
+  }
+
+  formatEmplacement(emplacement: Emplacement): string {
+    return `${emplacement.site} / ${emplacement.etage} / ${emplacement.rosace}`;
+  }
 
   unassign(equipment: Equipment): void {
     if (!confirm('Voulez-vous vraiment désassigner cet équipement ?')) return;
@@ -779,19 +802,72 @@ formatEmplacement(emplacement: Emplacement): string {
     });
   }
 
-  createNew(): void { this.router.navigate(['/equipment/new']); }
-  edit(eq: Equipment): void { this.router.navigate(['/equipment/edit', eq.id]); }
-
-  delete(eq: Equipment): void {
-    if (confirm(`Supprimer l'équipement ${eq.serial_number} ?`)) {
-      this.equipmentService.deleteEquipment(eq.id!).subscribe({
-        next: () => this.loadEquipment(),
-        error: () => { this.error = 'Erreur lors de la suppression'; }
-      });
-    }
+  createNew(): void {
+    this.router.navigate(['/equipment/new']);
   }
 
-  // ✅ Méthodes d'affichage alignées avec les Enums backend
+  edit(eq: Equipment): void {
+    this.router.navigate(['/equipment/edit', eq.id]);
+  }
+
+  delete(eq: Equipment): void {
+    if (!eq.id) return;
+
+    this.error = '';
+
+    const currentUser = this.authService.currentUserValue;
+    const role = (currentUser?.role || '').toString().toLowerCase();
+
+    const isAdmin =
+      role === 'admin' ||
+      role.includes('admin');
+
+    const isGestionnaire =
+      role === 'gestionnaire' ||
+      role.includes('gestionnaire') ||
+      role.includes('manager');
+
+    if (isAdmin) {
+      if (confirm(`Supprimer définitivement l'équipement ${eq.serial_number} ?`)) {
+        this.equipmentService.deleteEquipment(eq.id).subscribe({
+          next: () => {
+            this.loadEquipment();
+          },
+          error: (err: any) => {
+            console.error('Erreur suppression admin:', err);
+            this.error = err?.error?.detail || 'Erreur lors de la suppression';
+          }
+        });
+      }
+
+      return;
+    }
+
+    if (isGestionnaire) {
+      const confirmation =
+        `Vous n'avez pas le droit de supprimer directement cet équipement.\n\n` +
+        `Une notification sera envoyée à l'administrateur pour traiter votre demande.\n\n` +
+        `Équipement : ${eq.serial_number} - ${eq.model}`;
+
+      if (!confirm(confirmation)) return;
+
+      this.notificationService.requestDeleteEquipment(eq.id).subscribe({
+        next: (res: any) => {
+          alert(res.message || "Votre demande a été envoyée à l'administrateur.");
+          this.error = '';
+        },
+        error: (err: any) => {
+          console.error('Erreur demande suppression:', err);
+          this.error = err?.error?.detail || "Erreur lors de l'envoi de la demande.";
+        }
+      });
+
+      return;
+    }
+
+    alert("Vous n'avez pas le droit de supprimer ou demander la suppression d'un équipement.");
+  }
+
   getTypeIcon(type: string): string {
     return EquipmentTypeIcons[type as EquipmentType] || '📦';
   }

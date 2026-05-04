@@ -1,18 +1,130 @@
 <nav class="navbar">
-  <div class="navbar-brand">
-    <h1>📦 IT Inventory</h1>
-  </div>
-  
-  <ul class="navbar-menu">
-    <li><a routerLink="/dashboard" routerLinkActive="active">🏠 Dashboard</a></li>
-    <li><a routerLink="/equipment" routerLinkActive="active">💻 Équipements</a></li>
-    <li><a routerLink="/employees" routerLinkActive="active">👥 Employés</a></li>
-    <li><a routerLink="/locations" routerLinkActive="active">🏢 Emplacements</a></li>
-    <li><a routerLink="/carbon" routerLinkActive="active">🌱 Empreinte Carbone</a></li>
-  </ul>
-  
-  <div class="navbar-user">
-    <span>{{ currentUser?.full_name || currentUser?.email }}</span>
-    <button class="btn-logout" (click)="logout()">🚪 Déconnexion</button>
+  <div class="navbar-container">
+
+    <a class="navbar-brand" routerLink="/dashboard">
+      📦 StockMind
+    </a>
+
+    <div class="navbar-menu">
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        📊 Dashboard
+      </a>
+
+      <a routerLink="/equipment" routerLinkActive="active">
+        💻 Équipements
+      </a>
+
+      <a routerLink="/employees" routerLinkActive="active">
+        👤 Employés
+      </a>
+
+      <a routerLink="/emplacements" routerLinkActive="active">
+        📍 Emplacements
+      </a>
+
+      <a routerLink="/carbon" routerLinkActive="active">
+        🌱 Empreinte Carbone
+      </a>
+
+      <a
+        routerLink="/users"
+        routerLinkActive="active"
+        *ngIf="authService.isAdmin()"
+      >
+        👥 Utilisateurs
+      </a>
+    </div>
+
+    <div class="navbar-user">
+
+      <div class="notification-wrapper">
+        <button
+          type="button"
+          class="notification-btn"
+          (click)="toggleNotifications()"
+        >
+          🔔
+          <span class="notification-count" *ngIf="unreadCount > 0">
+            {{ unreadCount }}
+          </span>
+        </button>
+
+        <div class="notification-dropdown" *ngIf="showNotifications">
+          <div class="notification-header">
+            Notifications
+          </div>
+
+          <div class="notification-empty" *ngIf="notifications.length === 0">
+            Aucune notification
+          </div>
+
+          <div
+            class="notification-item"
+            *ngFor="let notif of notifications"
+            [class.unread]="!notif.is_read"
+            (click)="markAsRead(notif)"
+          >
+            <div class="notification-title">
+              {{ notif.title }}
+            </div>
+
+            <div class="notification-message">
+              {{ notif.message }}
+            </div>
+
+            <div class="notification-status">
+              Statut : {{ notif.status }}
+            </div>
+
+            <div
+              class="notification-actions"
+              *ngIf="authService.isAdmin() && notif.type === 'delete_request' && notif.status === 'pending'"
+            >
+              <button
+                type="button"
+                class="notif-approve"
+                (click)="approve(notif); $event.stopPropagation()"
+              >
+                ✅ Valider
+              </button>
+
+              <button
+                type="button"
+                class="notif-reject"
+                (click)="reject(notif); $event.stopPropagation()"
+              >
+                ❌ Annuler
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <span
+        class="role-badge"
+        *ngIf="authService.currentUserValue"
+        [ngClass]="authService.isAdmin() ? 'role-admin' : 'role-gestionnaire'"
+      >
+        {{ authService.isAdmin() ? '👑 Admin' : '🔧 Gestionnaire' }}
+      </span>
+
+      <span class="user-name" *ngIf="authService.currentUserValue">
+        {{ authService.currentUserValue.first_name }}
+        {{ authService.currentUserValue.last_name }}
+      </span>
+
+      <button
+        type="button"
+        class="btn-logout"
+        (click)="logout()"
+      >
+        🚪 Déconnexion
+      </button>
+
+    </div>
   </div>
 </nav>
