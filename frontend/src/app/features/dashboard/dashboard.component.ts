@@ -317,6 +317,89 @@ Chart.register(...registerables);
     .chart-body { position: relative; height: 190px; }
     .chart-body canvas { max-height: 190px !important; }
 
+
+        body.light-theme .dash-wrap {
+      background: #f6f8fa !important;
+    }
+
+    body.light-theme .sidebar {
+      background: #ffffff !important;
+      border-right: 1px solid #d0d7de !important;
+    }
+
+    body.light-theme .section-label {
+      color: #667085 !important;
+    }
+
+    body.light-theme .sidebar-item {
+      color: #475467 !important;
+    }
+
+ body.light-theme .item-badge {
+  background: #e5e7eb !important;
+  color: #344054 !important;
+  border: 1px solid #d0d5dd !important;
+}
+
+    body.light-theme .main {
+      background: #f6f8fa !important;
+    }
+
+    body.light-theme .title,
+    body.light-theme .table-header,
+    body.light-theme td strong,
+    body.light-theme .chart-title {
+      color: #111827 !important;
+    }
+
+    body.light-theme .subtitle {
+  color: #475467 !important;
+  opacity: 1 !important;
+}
+
+    body.light-theme .subtitle strong {
+      color: #111827 !important;
+    }
+
+    body.light-theme .kpi-label,
+    body.light-theme th {
+      color: #667085 !important;
+    }
+
+    body.light-theme .kpi-val {
+      color: #111827 !important;
+    }
+
+    body.light-theme .kpi-unit {
+      color: #475467 !important;
+    }
+
+    body.light-theme .table-card,
+    body.light-theme .chart-card,
+    body.light-theme .kpi-card {
+      background: #ffffff !important;
+      border-color: #d0d7de !important;
+    }
+
+    body.light-theme th {
+      background: #f9fafb !important;
+      border-bottom: 1px solid #d0d7de !important;
+    }
+
+    body.light-theme td {
+      border-bottom: 1px solid #e5e7eb !important;
+    }
+
+    body.light-theme tbody tr:hover {
+      background: #f9fafb !important;
+    }
+
+    body.light-theme .badge-type {
+      background: #eff6ff !important;
+      color: #175cd3 !important;
+      border-color: #bfdcff !important;
+    }
+
     /* ── Table ── */
     .table-card {
       background: #161b22; border: 1px solid #21262d;
@@ -425,8 +508,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private zone:   NgZone
   ) {}
 
-  ngOnInit(): void    { this.loadAll(); }
-  ngOnDestroy(): void { this.destroyCharts(); }
+ngOnInit(): void {
+  this.loadAll();
+  window.addEventListener('theme-changed', this.onThemeChanged);
+}
+
+ngOnDestroy(): void {
+  this.destroyCharts();
+  window.removeEventListener('theme-changed', this.onThemeChanged);
+}
   go(path: string): void { this.router.navigate([path]); }
   reload(): void { this.loadAll(); }
 
@@ -506,17 +596,44 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     });
   }
+private isLightTheme(): boolean {
+  return document.body.classList.contains('light-theme');
+}
 
+private onThemeChanged = () => {
+  this.zone.runOutsideAngular(() => {
+    requestAnimationFrame(() => this.buildCharts());
+  });
+};
   buildCharts(): void {
     this.destroyCharts();
 
-    const legendOpts = {
-      labels: { color:'#8b949e', font:{ size:10 }, padding:8, boxWidth:10 }
-    };
-    const scaleOpts: any = {
-      x: { ticks:{ color:'#484f58', font:{ size:9 } }, grid:{ color:'#21262d' } },
-      y: { ticks:{ color:'#484f58', font:{ size:9 } }, grid:{ color:'#21262d' }, beginAtZero:true }
-    };
+    const isLight = this.isLightTheme();
+
+const legendColor = isLight ? '#475467' : '#8b949e';
+const tickColor   = isLight ? '#475467' : '#484f58';
+const gridColor   = isLight ? '#d0d7de' : '#21262d';
+
+const legendOpts = {
+  labels: {
+    color: legendColor,
+    font: { size: 10 },
+    padding: 8,
+    boxWidth: 10
+  }
+};
+
+const scaleOpts: any = {
+  x: {
+    ticks: { color: tickColor, font: { size: 9 } },
+    grid: { color: gridColor }
+  },
+  y: {
+    ticks: { color: tickColor, font: { size: 9 } },
+    grid: { color: gridColor },
+    beginAtZero: true
+  }
+};
 
     // Donut types
     if (this.donutRef?.nativeElement && this.categories.length > 0) {
@@ -595,7 +712,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     }
   }
-
+  
   getTypeLabel(t: string): string   { return this.typeLabels[t]   || t || '-'; }
   getTypeIcon(t: string): string    { return this.typeIcons[t]    || '📦'; }
   getStatusLabel(s: string): string { return this.statusLabels[s] || s || '-'; }

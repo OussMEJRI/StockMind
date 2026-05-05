@@ -31,6 +31,61 @@
   color: #39d353;
 }
 
+/* ===== LIGHT THEME ===== */
+body.light-theme .carbon-container {
+  background: #f6f8fa !important;
+}
+
+body.light-theme .carbon-header h1 {
+  color: #111827 !important;
+}
+
+body.light-theme .carbon-header p {
+  color: #475467 !important;
+}
+
+body.light-theme .carbon-header p strong {
+  color: #16a34a !important;
+}
+
+body.light-theme .main-card,
+body.light-theme .detail-card,
+body.light-theme .methodology-note,
+body.light-theme .loading-card {
+  background: #ffffff !important;
+  border-color: #d0d7de !important;
+}
+
+body.light-theme .co2-value,
+body.light-theme .co2-value .unit {
+  color: #16a34a !important;
+}
+
+body.light-theme .co2-subtitle,
+body.light-theme .equiv-label,
+body.light-theme .detail-label {
+  color: #475467 !important;
+}
+
+body.light-theme .equiv-value,
+body.light-theme .detail-value,
+body.light-theme .methodology-note strong {
+  color: #111827 !important;
+}
+
+body.light-theme .equivalences {
+  border-top: 1px solid #e5e7eb !important;
+}
+
+body.light-theme .methodology-note {
+  color: #475467 !important;
+  background: #ffffff !important;
+}
+
+body.light-theme .loading-card p {
+  color: #475467 !important;
+}
+
 /* ─── Bouton Actualiser ─── */
 .btn-refresh {
   background: rgba(57, 211, 83, 0.12);

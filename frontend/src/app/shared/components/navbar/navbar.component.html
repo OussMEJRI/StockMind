@@ -99,7 +99,9 @@
               >
                 ❌ Annuler
               </button>
+              
             </div>
+
           </div>
         </div>
       </div>
@@ -116,7 +118,13 @@
         {{ authService.currentUserValue.first_name }}
         {{ authService.currentUserValue.last_name }}
       </span>
-
+      <button
+  type="button"
+  class="theme-toggle"
+  (click)="toggleTheme()"
+>
+  {{ isDarkTheme ? '☀️ Clair' : '🌙 Sombre' }}
+</button>
       <button
         type="button"
         class="btn-logout"

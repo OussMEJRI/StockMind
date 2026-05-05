@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AppNotification } from '../../../core/models/notification.model';
-
+import { ThemeService } from '../../../core/services/theme.service';
 @Component({
   selector: 'app-navbar',
   standalone: false,
@@ -242,6 +242,22 @@ import { AppNotification } from '../../../core/models/notification.model';
       cursor: pointer;
       font-size: 0.75rem;
     }
+          .theme-toggle {
+      background: rgba(188,140,255,0.12);
+      border: 1px solid rgba(188,140,255,0.35);
+      color: #bc8cff;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .theme-toggle:hover {
+      background: rgba(188,140,255,0.22);
+      border-color: rgba(188,140,255,0.55);
+    }
 
     @media (max-width: 992px) {
       .navbar-menu {
@@ -258,7 +274,8 @@ export class NavbarComponent implements OnInit {
   constructor(
     public authService: AuthService,
     private notificationService: NotificationService,
-    private router: Router
+    private router: Router,
+    public themeService: ThemeService
   ) {}
 
   ngOnInit(): void {
@@ -280,7 +297,13 @@ export class NavbarComponent implements OnInit {
       error: (err) => console.error('Erreur notifications:', err)
     });
   }
+  toggleTheme(): void {
+  this.themeService.toggleTheme();
+}
 
+  get isDarkTheme(): boolean {
+  return this.themeService.isDarkTheme();
+  }
   toggleNotifications(): void {
     this.showNotifications = !this.showNotifications;
 

@@ -30,6 +30,7 @@ html, body {
   --text-primary: #e6edf3;
   --text-muted:   #8b949e;
   --text-dim:     #484f58;
+  --app-bg: #0d1117;
   --shadow:       0 2px 10px rgba(0,0,0,0.4);
   --shadow-lg:    0 10px 40px rgba(0,0,0,0.6);
 }
@@ -309,4 +310,408 @@ select.form-control {
 @media (max-width: 768px) {
   .page-header { flex-direction: column; align-items: flex-start; gap: 0.8rem; }
   .table { display: block; overflow-x: auto; }
+}
+/* =========================
+   LIGHT THEME OVERRIDES
+   ========================= */
+
+:root {
+  --app-bg: #0d1117;
+}
+
+body.light-theme {
+  --app-bg: #f6f8fa;
+  background: #f6f8fa !important;
+  color: #111827 !important;
+}
+
+body.light-theme .app-container,
+body.light-theme .main-content {
+  background: #f6f8fa !important;
+  color: #111827 !important;
+}
+
+/* Navbar */
+body.light-theme .navbar {
+  background: #ffffff !important;
+  border-bottom: 1px solid #d0d7de !important;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06) !important;
+}
+
+body.light-theme .navbar-brand {
+  color: #16a34a !important;
+}
+
+body.light-theme .navbar-menu a {
+  color: #475467 !important;
+}
+
+body.light-theme .navbar-menu a:hover {
+  background: #f3f4f6 !important;
+  color: #111827 !important;
+  border-color: #d0d7de !important;
+}
+
+body.light-theme .navbar-menu a.active {
+  background: rgba(22,163,74,0.10) !important;
+  color: #15803d !important;
+  border-color: rgba(22,163,74,0.25) !important;
+}
+
+body.light-theme .user-name {
+  color: #344054 !important;
+}
+
+/* Global cards, tables, filters, modals */
+body.light-theme .card,
+body.light-theme .table-card,
+body.light-theme .filters-card,
+body.light-theme .chart-card,
+body.light-theme .kpi-card,
+body.light-theme .modal,
+body.light-theme .modal-box,
+body.light-theme .modal-content,
+body.light-theme .notification-dropdown,
+body.light-theme .loading-card,
+body.light-theme .main-card,
+body.light-theme .detail-card,
+body.light-theme .methodology-note,
+body.light-theme .popup-container,
+body.light-theme .filters,
+body.light-theme .sidebar-item.active,
+body.light-theme .sidebar-item:hover {
+  background: #ffffff !important;
+  border-color: #d0d7de !important;
+  color: #111827 !important;
+}
+
+/* Inputs */
+body.light-theme input,
+body.light-theme select,
+body.light-theme textarea,
+body.light-theme .form-control,
+body.light-theme .filters input,
+body.light-theme .filters select,
+body.light-theme .form-group input,
+body.light-theme .form-group select {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #d0d7de !important;
+}
+
+body.light-theme input::placeholder,
+body.light-theme textarea::placeholder {
+  color: #667085 !important;
+}
+
+/* Alerts */
+body.light-theme .alert-danger {
+  background: #fef2f2 !important;
+  border-color: #fecaca !important;
+  color: #b42318 !important;
+}
+
+/* Code */
+body.light-theme code {
+  background: #f3f4f6 !important;
+  color: #334155 !important;
+  border-color: #d0d7de !important;
+}
+
+/* Buttons */
+body.light-theme .btn-outline {
+  background: #ffffff !important;
+  border-color: #d0d7de !important;
+  color: #344054 !important;
+}
+
+body.light-theme .btn-outline:hover {
+  background: #f9fafb !important;
+  color: #111827 !important;
+}
+/* =========================================================
+   GLOBAL LIGHT THEME - CLEAN BASE
+   ========================================================= */
+
+body.light-theme {
+  --app-bg: #f6f8fa;
+  background: #f6f8fa !important;
+  color: #111827 !important;
+}
+
+/* app root */
+body.light-theme app-root,
+body.light-theme .app-container,
+body.light-theme .main-content {
+  background: #f6f8fa !important;
+  color: #111827 !important;
+}
+
+/* page wrappers */
+body.light-theme .page-container,
+body.light-theme .main,
+body.light-theme .content,
+body.light-theme .content-wrapper,
+body.light-theme .dash-wrap,
+body.light-theme .dashboard-container,
+body.light-theme .equipment-container,
+body.light-theme .employee-container,
+body.light-theme .employees-container,
+body.light-theme .emplacement-list-container,
+body.light-theme .carbon-container,
+body.light-theme .inventory-container {
+  background: #f6f8fa !important;
+  color: #111827 !important;
+}
+
+/* sidebar */
+body.light-theme .sidebar {
+  background: #ffffff !important;
+  border-right: 1px solid #e5e7eb !important;
+}
+
+body.light-theme .sidebar-item,
+body.light-theme .section-label,
+body.light-theme .nav-section-title {
+  color: #475467 !important;
+}
+
+body.light-theme .sidebar-item.active,
+body.light-theme .sidebar-item:hover {
+  background: #f9fafb !important;
+  color: #111827 !important;
+}
+
+/* cards / filters / panels / tables */
+body.light-theme .card,
+body.light-theme .kpi-card,
+body.light-theme .chart-card,
+body.light-theme .table-card,
+body.light-theme .filters-card,
+body.light-theme .filters,
+body.light-theme .panel,
+body.light-theme .stats-card,
+body.light-theme .main-card,
+body.light-theme .detail-card,
+body.light-theme .methodology-note,
+body.light-theme .popup-container,
+body.light-theme .modal-content {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  color: #111827 !important;
+  box-shadow: none !important;
+}
+
+/* titles */
+body.light-theme h1,
+body.light-theme h2,
+body.light-theme h3,
+body.light-theme h4,
+body.light-theme .title,
+body.light-theme .page-title,
+body.light-theme .chart-title,
+body.light-theme .card-title,
+body.light-theme .table-title {
+  color: #111827 !important;
+}
+
+/* secondary text */
+body.light-theme p,
+body.light-theme span,
+body.light-theme label,
+body.light-theme .subtitle,
+body.light-theme .text-muted,
+body.light-theme .muted,
+body.light-theme .description,
+body.light-theme .kpi-label,
+body.light-theme .kpi-sub,
+body.light-theme .form-label {
+  color: #475467 !important;
+}
+
+/* important values / numbers */
+body.light-theme .kpi-val,
+body.light-theme .kpi-value,
+body.light-theme .stat-number,
+body.light-theme .metric-value,
+body.light-theme .big-number,
+body.light-theme .count,
+body.light-theme .value {
+  color: #111827 !important;
+  font-weight: 700 !important;
+}
+
+/* tables */
+body.light-theme table {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+body.light-theme thead,
+body.light-theme th {
+  background: #f9fafb !important;
+  color: #344054 !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+body.light-theme td {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+body.light-theme tbody tr:hover td {
+  background: #f9fafb !important;
+  color: #111827 !important;
+}
+
+/* forms */
+body.light-theme input,
+body.light-theme select,
+body.light-theme textarea,
+body.light-theme .form-control {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #d0d5dd !important;
+}
+
+body.light-theme input::placeholder,
+body.light-theme textarea::placeholder {
+  color: #667085 !important;
+}
+
+/* badges that were too pale */
+body.light-theme .item-badge,
+body.light-theme .badge,
+body.light-theme .tag {
+  color: inherit;
+}
+
+/* buttons outline */
+body.light-theme .btn-outline,
+body.light-theme .btn-light {
+  background: #ffffff !important;
+  color: #344054 !important;
+  border: 1px solid #d0d5dd !important;
+}
+/* =========================================================
+   LIGHT THEME - TARGETED FIXES FOR REMAINING FADED TEXT
+   ========================================================= */
+
+/* -------- 1) DASHBOARD : colonne MODÈLE dans "Derniers équipements" -------- */
+body.light-theme .table-card td:nth-child(2),
+body.light-theme .latest-equipment-table td:nth-child(2),
+body.light-theme .recent-equipment-table td:nth-child(2) {
+  color: #475467 !important;
+  opacity: 1 !important;
+  font-weight: 500 !important;
+}
+
+/* si certains éléments du modèle sont dans un span/strong */
+body.light-theme .table-card td:nth-child(2) span,
+body.light-theme .table-card td:nth-child(2) strong,
+body.light-theme .latest-equipment-table td:nth-child(2) span,
+body.light-theme .latest-equipment-table td:nth-child(2) strong,
+body.light-theme .recent-equipment-table td:nth-child(2) span,
+body.light-theme .recent-equipment-table td:nth-child(2) strong {
+  color: #475467 !important;
+  opacity: 1 !important;
+}
+
+
+/* -------- 2) EMPLOYEES : colonne NOM -------- */
+body.light-theme .employees-table td:first-child,
+body.light-theme .employee-table td:first-child,
+body.light-theme table td:first-child .employee-name,
+body.light-theme table td:first-child strong,
+body.light-theme table td:first-child span {
+  color: #475467 !important;
+  opacity: 1 !important;
+  font-weight: 600 !important;
+}
+
+
+/* -------- 3) IMPACT CARBONE : valeurs sous les icônes -------- */
+body.light-theme .equiv-value,
+body.light-theme .equivalence-value,
+body.light-theme .equiv-item .value,
+body.light-theme .equiv-item strong {
+  color: #475467 !important;
+  opacity: 1 !important;
+  font-weight: 700 !important;
+}
+
+/* libellés sous les valeurs */
+body.light-theme .equiv-label,
+body.light-theme .equivalence-label,
+body.light-theme .equiv-item p,
+body.light-theme .equiv-item span {
+  color: #475467 !important;
+  opacity: 1 !important;
+}
+
+
+/* -------- 4) IMPACT CARBONE : petites cards du bas -------- */
+body.light-theme .detail-value,
+body.light-theme .detail-card .value,
+body.light-theme .detail-card strong,
+body.light-theme .stat-value,
+body.light-theme .metric-value {
+  color: #475467 !important;
+  opacity: 1 !important;
+  font-weight: 700 !important;
+}
+
+body.light-theme .detail-label,
+body.light-theme .detail-card p,
+body.light-theme .detail-card span {
+  color: #475467 !important;
+  opacity: 1 !important;
+}
+
+
+/* -------- 5) IMPACT CARBONE : note / méthodologie -------- */
+body.light-theme .methodology-note,
+body.light-theme .methodology-note p,
+body.light-theme .methodology-note span {
+  color: #111827 !important;
+  opacity: 1 !important;
+}
+
+body.light-theme .methodology-note strong,
+body.light-theme .methodology-note b {
+  color: #475467 !important;
+  opacity: 1 !important;
+  font-weight: 700 !important;
+}
+/* sidebar counters in light theme */
+body.light-theme .item-badge,
+body.light-theme .nav-badge,
+body.light-theme .sidebar-badge,
+body.light-theme .count-badge {
+  background: #e5e7eb !important;
+  color: #344054 !important;
+  border: 1px solid #d0d5dd !important;
+  box-shadow: none !important;
+}
+/* dashboard summary counters in light theme */
+body.light-theme .subtitle,
+body.light-theme .subtitle span,
+body.light-theme .subtitle strong,
+body.light-theme .dashboard-subtitle,
+body.light-theme .dashboard-subtitle span,
+body.light-theme .dashboard-subtitle strong,
+body.light-theme .overview-subtitle,
+body.light-theme .overview-subtitle span,
+body.light-theme .overview-subtitle strong {
+  color: #475467 !important;
+  opacity: 1 !important;
+}
+
+body.light-theme .subtitle .count,
+body.light-theme .dashboard-subtitle .count,
+body.light-theme .overview-subtitle .count {
+  color: #111827 !important;
+  font-weight: 700 !important;
+  opacity: 1 !important;
 }
