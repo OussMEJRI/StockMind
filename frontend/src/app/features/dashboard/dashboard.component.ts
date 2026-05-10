@@ -484,11 +484,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   };
   private statusLabels: Record<string,string> = {
     in_stock:'En stock', assigned:'Assigné',
-    maintenance:'En maintenance', retired:'Retiré'
+    maintenance:'En maintenance', stolen:'Retiré'
   };
   private statusColors: Record<string,string> = {
     in_stock:'#388bfd', assigned:'#39d353',
-    maintenance:'#e3b341', retired:'#f85149'
+    maintenance:'#e3b341', stolen:'#f85149'
   };
   private condLabels: Record<string,string> = {
     new:'Neuf', good:'Bon état', fair:'Correct', poor:'Mauvais'
@@ -548,7 +548,7 @@ ngOnDestroy(): void {
         this.assignes      = equipments.filter(e => e.status === EquipmentStatus.ASSIGNED).length;
         this.enStock       = equipments.filter(e => e.status === EquipmentStatus.IN_STOCK).length;
         this.enMaintenance = equipments.filter(e => e.status === EquipmentStatus.MAINTENANCE).length;
-        this.retires       = equipments.filter(e => e.status === EquipmentStatus.RETIRED).length;
+        this.retires       = equipments.filter(e => e.status === EquipmentStatus.STOLEN).length;
         this.assignesPct   = this.totalEquipments > 0
           ? Math.round((this.assignes / this.totalEquipments) * 100) : 0;
 
@@ -567,7 +567,7 @@ ngOnDestroy(): void {
           { label:'En stock',    color:'#388bfd', count: this.enStock },
           { label:'Assignés',    color:'#39d353', count: this.assignes },
           { label:'Maintenance', color:'#e3b341', count: this.enMaintenance },
-          { label:'Retirés',     color:'#f85149', count: this.retires },
+          { label:'Volés',     color:'#f85149', count: this.retires },
         ];
 
         this.loading = false;
@@ -671,7 +671,7 @@ const scaleOpts: any = {
             { label:'En stock',    data: this.categories.map(c => gc(c.key, EquipmentStatus.IN_STOCK)),    backgroundColor:'rgba(56,139,253,0.6)',  borderColor:'#388bfd', borderWidth:1, borderRadius:3 },
             { label:'Assignés',    data: this.categories.map(c => gc(c.key, EquipmentStatus.ASSIGNED)),    backgroundColor:'rgba(57,211,83,0.6)',   borderColor:'#39d353', borderWidth:1, borderRadius:3 },
             { label:'Maintenance', data: this.categories.map(c => gc(c.key, EquipmentStatus.MAINTENANCE)), backgroundColor:'rgba(227,179,65,0.6)',  borderColor:'#e3b341', borderWidth:1, borderRadius:3 },
-            { label:'Retirés',     data: this.categories.map(c => gc(c.key, EquipmentStatus.RETIRED)),     backgroundColor:'rgba(248,81,73,0.5)',   borderColor:'#f85149', borderWidth:1, borderRadius:3 }
+            { label:'Volés',     data: this.categories.map(c => gc(c.key, EquipmentStatus.STOLEN)),     backgroundColor:'rgba(248,81,73,0.5)',   borderColor:'#f85149', borderWidth:1, borderRadius:3 }
           ]
         },
         options: {

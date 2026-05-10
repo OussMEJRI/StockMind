@@ -159,18 +159,20 @@ export class EmplacementListComponent implements OnInit {
       'ASSIGNED': 'Assigné',
       'IN_STOCK': 'En stock',
       'MAINTENANCE': 'En maintenance',
-      'RETIRED': 'Retiré'
+      'STOLEN': 'Volé',
+      'RETIRED': 'Volé'
     };
     return labels[status] || status;
   }
 
   getStatusClass(status: string): string {
-    const classes: Record<string, string> = {
-      'ASSIGNED': 'badge-success',
-      'IN_STOCK': 'badge-info',
-      'MAINTENANCE': 'badge-warning',
-      'RETIRED': 'badge-danger'
-    };
-    return classes[status] || 'badge-secondary';
-  }
+  const classes: Record<string, string> = {
+    'ASSIGNED': 'badge-success',
+    'IN_STOCK': 'badge-info',
+    'MAINTENANCE': 'badge-warning',
+    'STOLEN': 'badge-danger',
+    'RETIRED': 'badge-danger'
+  };
+  return classes[status] || 'badge-secondary';
+}
 }

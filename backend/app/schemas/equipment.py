@@ -33,11 +33,16 @@ STATUS_TO_DB = {
     "in_stock": "IN_STOCK",
     "assigned": "ASSIGNED",
     "maintenance": "MAINTENANCE",
-    "retired": "RETIRED",
+    "stolen": "STOLEN",
+
+    # compatibilité ancienne valeur
+    "retired": "STOLEN",
+
     "IN_STOCK": "IN_STOCK",
     "ASSIGNED": "ASSIGNED",
     "MAINTENANCE": "MAINTENANCE",
-    "RETIRED": "RETIRED",
+    "STOLEN": "STOLEN",
+    "RETIRED": "STOLEN",
 }
 
 DB_TO_API_TYPE = {
@@ -58,7 +63,10 @@ DB_TO_API_STATUS = {
     "IN_STOCK": "in_stock",
     "ASSIGNED": "assigned",
     "MAINTENANCE": "maintenance",
-    "RETIRED": "retired",
+    "STOLEN": "stolen",
+
+    # compatibilité anciennes données
+    "RETIRED": "stolen",
 }
 
 

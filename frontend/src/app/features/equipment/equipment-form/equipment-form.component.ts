@@ -95,7 +95,7 @@ import {
                         [class.invalid]="isInvalid('status')"
                         (change)="onStatusChange()">
                   <option value="">Sélectionner un statut</option>
-                  <option *ngFor="let stat of statuses" [value]="stat">
+                  <option *ngFor="let stat of availableStatuses" [value]="stat">
                     {{ getStatusName(stat) }}
                   </option>
                 </select>
@@ -190,6 +190,55 @@ import {
               </button>
             </div>
           </form>
+          <!-- Popup confirmation Volé -->
+<div class="modal-overlay" *ngIf="showStolenConfirmModal" (click)="cancelStolenConfirm()">
+  <div class="modal-box stolen-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>⚠️ Confirmer le statut "Volé"</h3>
+      <button type="button" class="close-btn" (click)="cancelStolenConfirm()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="info-card">
+        <h4>Équipement</h4>
+        <p><strong>Numéro de série :</strong> {{ form.get('serial_number')?.value }}</p>
+        <p><strong>Modèle :</strong> {{ form.get('model')?.value }}</p>
+        <p><strong>Type :</strong> {{ getTypeName(form.get('equipment_type')?.value) }}</p>
+      </div>
+
+      <div class="info-card" *ngIf="selectedEmployeeInfo">
+        <h4>Utilisateur affecté</h4>
+        <p><strong>Nom :</strong> {{ selectedEmployeeInfo.name }}</p>
+        <p><strong>Email :</strong> {{ selectedEmployeeInfo.email }}</p>
+        <p><strong>CUID :</strong> {{ selectedEmployeeInfo.cuid || '-' }}</p>
+        <p><strong>Département :</strong> {{ selectedEmployeeInfo.department || '-' }}</p>
+      </div>
+
+      <div class="info-card" *ngIf="!selectedEmployeeInfo && selectedEmplacementInfo">
+        <h4>Emplacement affecté</h4>
+        <p><strong>Site :</strong> {{ selectedEmplacementInfo.site }}</p>
+        <p><strong>Étage :</strong> {{ selectedEmplacementInfo.etage }}</p>
+        <p><strong>Rosace :</strong> {{ selectedEmplacementInfo.rosace }}</p>
+        <p><strong>Position :</strong> {{ selectedEmplacementInfo.exact_position || '-' }}</p>
+      </div>
+
+      <div class="warning-box">
+        Cet équipement sera marqué comme <strong>volé</strong>.<br>
+        Merci de contacter le support à l'adresse suivante :
+        <strong>{{ supportEmail }}</strong>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="cancelStolenConfirm()">
+        Annuler
+      </button>
+      <button type="button" class="btn btn-danger" (click)="confirmStolen()">
+        Confirmer
+      </button>
+    </div>
+  </div>
+</div>
         </div>
       </div>
     </div>
@@ -344,28 +393,71 @@ export class EquipmentFormComponent implements OnInit {
   equipmentId?: number;
   loading = false;
   error = '';
+  
 
-  equipmentTypes = Object.values(EquipmentType);
-  conditions     = Object.values(EquipmentCondition);
-  statuses       = Object.values(EquipmentStatus);
+  showStolenConfirmModal = false;
+pendingSubmitValue: any = null;
+readonly supportEmail = 'support@ysofrecom.com';
+
+equipmentTypes = Object.values(EquipmentType);
+conditions = Object.values(EquipmentCondition);
+
+// Données pour l'assignation
+employees: Employee[] = [];
+emplacements: Emplacement[] = [];
+emplacementsBySite: Record<string, Emplacement[]> = {};
+loadingEmployees = false;
+loadingEmplacements = false;
+
+get hasAssignment(): boolean {
+  return !!(
+    this.form?.get('employee_id')?.value ||
+    this.form?.get('emplacement_id')?.value
+  );
+}
+
+get isAssigned(): boolean {
+  return this.form?.get('status')?.value === EquipmentStatus.ASSIGNED;
+}
+
+get isStolen(): boolean {
+  return this.form?.get('status')?.value === EquipmentStatus.STOLEN;
+}
+
+get isLaptop(): boolean {
+  return this.form?.get('equipment_type')?.value === EquipmentType.LAPTOP;
+}
+
+get availableStatuses(): EquipmentStatus[] {
+  // Création
+  if (!this.isEditMode) {
+    return [
+      EquipmentStatus.IN_STOCK,
+      EquipmentStatus.ASSIGNED,
+      EquipmentStatus.MAINTENANCE
+    ];
+  }
+
+  // Modification avec équipement déjà affecté
+  if (this.hasAssignment) {
+    return [
+      EquipmentStatus.ASSIGNED,
+      EquipmentStatus.MAINTENANCE,
+      EquipmentStatus.STOLEN
+    ];
+  }
+
+  // Modification sans affectation
+  return [
+    EquipmentStatus.IN_STOCK,
+    EquipmentStatus.MAINTENANCE
+  ];
+}
 
   // Données pour l'assignation
-  employees: Employee[] = [];
-  emplacements: Emplacement[] = [];
-  emplacementsBySite: Record<string, Emplacement[]> = {};
-  loadingEmployees   = false;
-  loadingEmplacements = false;
+ 
 
-  // États réactifs
-  get isAssigned(): boolean {
-    return this.form?.get('status')?.value === EquipmentStatus.ASSIGNED;
-  }
-
-  get isLaptop(): boolean {
-    return this.form?.get('equipment_type')?.value === EquipmentType.LAPTOP;
-  }
-
-  constructor(
+    constructor(
     private fb: FormBuilder,
     private equipmentService: EquipmentService,
     private employeeService: EmployeeService,
@@ -398,22 +490,30 @@ export class EquipmentFormComponent implements OnInit {
       next: (eq) => {
         this.form.patchValue(eq);
         // Si déjà assigné, charger les listes
-        if (eq.status === EquipmentStatus.ASSIGNED) {
-          this.loadAssignmentData();
-        }
+       if (eq.employee_id || eq.emplacement_id) {
+           this.loadAssignmentData();
+         }
       },
       error: () => { this.error = "Erreur lors du chargement de l'équipement"; }
     });
   }
 
   onStatusChange(): void {
-    if (this.isAssigned) {
-      this.loadAssignmentData();
-    } else {
-      // Réinitialiser les champs d'assignation
-      this.form.patchValue({ employee_id: null, emplacement_id: null });
-    }
+    const status = this.form?.get('status')?.value;
+
+  if (status === EquipmentStatus.ASSIGNED) {
+    this.loadAssignmentData();
+    return;
   }
+
+  // Volé garde l'affectation existante
+  if (status === EquipmentStatus.STOLEN) {
+    return;
+  }
+
+  // Tous les autres statuts libèrent l'affectation
+  this.form.patchValue({ employee_id: null, emplacement_id: null });
+}
 
   onTypeChange(): void {
     // Réinitialiser les champs d'assignation si on change de type
@@ -462,48 +562,54 @@ export class EquipmentFormComponent implements OnInit {
     });
   }
 
-  onSubmit(): void {
-    if (this.form.invalid) {
-      Object.keys(this.form.controls).forEach(k =>
-        this.form.get(k)?.markAsTouched()
-      );
+onSubmit(): void {
+  if (this.form.invalid) {
+    Object.keys(this.form.controls).forEach(k =>
+      this.form.get(k)?.markAsTouched()
+    );
+    return;
+  }
+
+  this.error = '';
+  const formValue = { ...this.form.value };
+
+  // Cas ASSIGNED
+  if (formValue.status === EquipmentStatus.ASSIGNED) {
+    if (this.isLaptop) {
+      formValue.emplacement_id = null;
+    } else {
+      formValue.employee_id = null;
+    }
+  }
+
+  // Cas STOLEN : uniquement si déjà affecté
+  else if (formValue.status === EquipmentStatus.STOLEN) {
+    if (!formValue.employee_id && !formValue.emplacement_id) {
+      this.error = "Un équipement ne peut être marqué Volé que s'il est déjà affecté";
       return;
     }
 
-    this.loading = true;
-    this.error = '';
-
-    const formValue = { ...this.form.value };
-
-    // Nettoyer les champs non utilisés selon le type
-    if (formValue.status !== EquipmentStatus.ASSIGNED) {
-      formValue.employee_id   = null;
-      formValue.emplacement_id = null;
-    } else if (this.isLaptop) {
+    if (this.isLaptop) {
       formValue.emplacement_id = null;
     } else {
       formValue.employee_id = null;
     }
 
-    const request = this.isEditMode
-      ? this.equipmentService.updateEquipment(this.equipmentId!, formValue)
-      : this.equipmentService.createEquipment(formValue);
-
-    request.subscribe({
-      next: () => { this.router.navigate(['/equipment']); },
-      error: (err) => {
-        const detail = err?.error?.detail;
-        if (typeof detail === 'string') {
-          this.error = detail;
-        } else if (Array.isArray(detail)) {
-          this.error = detail.map((d: any) => d?.msg || JSON.stringify(d)).join(' | ');
-        } else {
-          this.error = "Erreur lors de l'enregistrement";
-        }
-        this.loading = false;
-      }
-    });
+    if (this.isEditMode) {
+      this.pendingSubmitValue = formValue;
+      this.showStolenConfirmModal = true;
+      return;
+    }
   }
+
+  // Cas IN_STOCK / MAINTENANCE
+  else {
+    formValue.employee_id = null;
+    formValue.emplacement_id = null;
+  }
+
+  this.submitEquipment(formValue);
+}
 
   isInvalid(field: string): boolean {
     const ctrl = this.form.get(field);
@@ -528,4 +634,53 @@ export class EquipmentFormComponent implements OnInit {
     };
     return icons[type] || '📦';
   }
+  submitEquipment(formValue: any): void {
+  this.loading = true;
+  this.error = '';
+
+  const request = this.isEditMode
+    ? this.equipmentService.updateEquipment(this.equipmentId!, formValue)
+    : this.equipmentService.createEquipment(formValue);
+
+  request.subscribe({
+    next: () => {
+      this.loading = false;
+      this.router.navigate(['/equipment']);
+    },
+    error: (err) => {
+      const detail = err?.error?.detail;
+      if (typeof detail === 'string') {
+        this.error = detail;
+      } else if (Array.isArray(detail)) {
+        this.error = detail.map((d: any) => d?.msg || JSON.stringify(d)).join(' | ');
+      } else {
+        this.error = "Erreur lors de l'enregistrement";
+      }
+      this.loading = false;
+    }
+  });
+}
+
+cancelStolenConfirm(): void {
+  this.showStolenConfirmModal = false;
+  this.pendingSubmitValue = null;
+}
+
+confirmStolen(): void {
+  if (!this.pendingSubmitValue) return;
+  const payload = { ...this.pendingSubmitValue };
+  this.showStolenConfirmModal = false;
+  this.pendingSubmitValue = null;
+  this.submitEquipment(payload);
+}
+
+get selectedEmployeeInfo(): Employee | undefined {
+  const id = this.form?.get('employee_id')?.value;
+  return this.employees.find(e => e.id === +id);
+}
+
+get selectedEmplacementInfo(): Emplacement | undefined {
+  const id = this.form?.get('emplacement_id')?.value;
+  return this.emplacements.find(e => e.id === +id);
+}
 }

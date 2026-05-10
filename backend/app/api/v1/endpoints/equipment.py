@@ -16,8 +16,19 @@ TYPE_MAP = {
     "PC":"PC","LAPTOP":"LAPTOP","MONITOR":"MONITOR","PHONE":"PHONE","ACCESSORY":"ACCESSORY",
 }
 STATUS_MAP = {
-    "in_stock":"IN_STOCK","assigned":"ASSIGNED","maintenance":"MAINTENANCE","retired":"RETIRED",
-    "IN_STOCK":"IN_STOCK","ASSIGNED":"ASSIGNED","MAINTENANCE":"MAINTENANCE","RETIRED":"RETIRED",
+    "in_stock": "IN_STOCK",
+    "assigned": "ASSIGNED",
+    "maintenance": "MAINTENANCE",
+    "stolen": "STOLEN",
+
+    # compatibilité ancienne valeur
+    "retired": "STOLEN",
+
+    "IN_STOCK": "IN_STOCK",
+    "ASSIGNED": "ASSIGNED",
+    "MAINTENANCE": "MAINTENANCE",
+    "STOLEN": "STOLEN",
+    "RETIRED": "STOLEN",
 }
 CONDITION_MAP = {
     "new":"NEW","good":"USED","fair":"USED","poor":"OUT_OF_SERVICE",
@@ -57,6 +68,11 @@ def create_equipment(
     ).first()
     if existing:
         raise HTTPException(status_code=400, detail="Serial number already exists")
+    if equipment.status == "STOLEN":
+        raise HTTPException(
+           status_code=400,
+           detail="Un équipement ne peut pas être créé directement avec le statut Volé"
+            )
     db_eq = EquipmentModel(**equipment.dict())
     db.add(db_eq)
     db.commit()
@@ -103,30 +119,67 @@ def update_equipment(
     db_eq = db.query(EquipmentModel).filter(EquipmentModel.id == equipment_id).first()
     if not db_eq:
         raise HTTPException(status_code=404, detail="Equipment not found")
+
     payload = equipment.dict(exclude_unset=True)
+
     target_type = payload.get("equipment_type", db_eq.equipment_type)
-    is_laptop = str(target_type).lower() == "laptop"
-    employee_id    = payload.get("employee_id")
-    emplacement_id = payload.get("emplacement_id")
-    if employee_id is not None and not is_laptop:
-        raise HTTPException(status_code=400, detail="Seuls les laptops peuvent être assignés à un employé")
-    if emplacement_id is not None and is_laptop:
-        raise HTTPException(status_code=400, detail="Les laptops doivent être assignés à un employé")
-    if employee_id is not None:
+    is_laptop = str(target_type).upper() == "LAPTOP"
+
+    requested_status = payload.get("status", db_eq.status)
+
+    current_employee_id = payload["employee_id"] if "employee_id" in payload else db_eq.employee_id
+    current_emplacement_id = payload["emplacement_id"] if "emplacement_id" in payload else db_eq.emplacement_id
+
+    has_assignment = bool(current_employee_id or current_emplacement_id)
+
+    # Volé uniquement si l'équipement est déjà affecté
+    if requested_status == "STOLEN" and not has_assignment:
+        raise HTTPException(
+            status_code=400,
+            detail="Un équipement ne peut être marqué Volé que s'il est déjà affecté"
+        )
+
+    # Cohérence type / affectation
+    if current_employee_id and not is_laptop:
+        raise HTTPException(
+            status_code=400,
+            detail="Seuls les laptops peuvent être assignés à un employé"
+        )
+
+    if current_emplacement_id and is_laptop:
+        raise HTTPException(
+            status_code=400,
+            detail="Les laptops doivent être assignés à un employé"
+        )
+
+    # Si on modifie explicitement l'affectation
+    if "employee_id" in payload and payload["employee_id"] is not None:
         payload["emplacement_id"] = None
-        payload["status"] = "ASSIGNED"
-    if emplacement_id is not None:
+        if requested_status != "STOLEN":
+            payload["status"] = "ASSIGNED"
+
+    if "emplacement_id" in payload and payload["emplacement_id"] is not None:
         payload["employee_id"] = None
-        payload["status"] = "ASSIGNED"
-    if "employee_id" in payload and payload["employee_id"] is None and "emplacement_id" not in payload:
-        payload["status"] = "IN_STOCK"
-    if "emplacement_id" in payload and payload["emplacement_id"] is None and "employee_id" not in payload:
-        payload["status"] = "IN_STOCK"
-    if ("employee_id" in payload and payload.get("employee_id") is None and
-        "emplacement_id" in payload and payload.get("emplacement_id") is None):
-        payload["status"] = "IN_STOCK"
+        if requested_status != "STOLEN":
+            payload["status"] = "ASSIGNED"
+
+    # Si on enlève explicitement l'affectation → retour en stock
+    if requested_status != "STOLEN":
+        if "employee_id" in payload and payload["employee_id"] is None and "emplacement_id" not in payload:
+            payload["status"] = "IN_STOCK"
+
+        if "emplacement_id" in payload and payload["emplacement_id"] is None and "employee_id" not in payload:
+            payload["status"] = "IN_STOCK"
+
+        if (
+            "employee_id" in payload and payload.get("employee_id") is None and
+            "emplacement_id" in payload and payload.get("emplacement_id") is None
+        ):
+            payload["status"] = "IN_STOCK"
+
     for key, value in payload.items():
         setattr(db_eq, key, value)
+
     db.commit()
     db.refresh(db_eq)
     return db_eq

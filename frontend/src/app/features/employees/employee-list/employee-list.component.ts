@@ -3,9 +3,15 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import * as XLSX from 'xlsx';
+import * as ExcelJS from 'exceljs';
 import { EmployeeService } from '../../../core/services/employee.service';
-import { Employee, EquipmentHistory, Department, DepartmentLabels } from '../../../core/models/employee.model';
-
+import {
+  Employee,
+  EquipmentHistory,
+  Department,
+  DepartmentLabels,
+  ContractType
+} from '../../../core/models/employee.model';
 @Component({
   selector: 'app-employee-list',
   standalone: true,
@@ -223,7 +229,7 @@ import { Employee, EquipmentHistory, Department, DepartmentLabels } from '../../
 .filters-row {
   display: flex;
   gap: 0.8rem;
-  align-items: end;
+  align-items: flex-end;
   flex-wrap: wrap;
 }
 
@@ -496,6 +502,7 @@ export class EmployeeListComponent implements OnInit {
   openMenuId: number | null = null;
   departments = Object.values(Department);
   departmentLabels = DepartmentLabels;
+  contractTypes = Object.values(ContractType);
 
   filterDepartment = '';
   filterSearch = '';
@@ -596,19 +603,178 @@ getDepartmentLabel(dept: string): string {
     return badges[contractType || ''] || 'badge-secondary';
   }
 
-  downloadTemplate(): void {
-    const template = [{
-      'Nom complet': 'Jean Dupont',
-      'Email': 'jean.dupont@sofrecom.com',
-      'CUID': 'JDUP1234',
-      'Type de contrat': 'CDI',
-      'Département': 'SUPPORT'
-    }];
-    const ws = XLSX.utils.json_to_sheet(template);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Employés');
-    XLSX.writeFile(wb, 'modele_employes.xlsx');
+async downloadTemplate(): Promise<void> {
+  const workbook = new ExcelJS.Workbook();
+
+  workbook.creator = 'StockMind';
+  workbook.created = new Date();
+
+  const worksheet = workbook.addWorksheet('Employés');
+  const referentialSheet = workbook.addWorksheet('Référentiels');
+
+  const contractTypes = this.contractTypes;
+  const departments = this.departments;
+
+  // Feuille cachée pour alimenter les listes déroulantes
+  referentialSheet.getCell('A1').value = 'Types de contrat';
+  contractTypes.forEach((value, index) => {
+    referentialSheet.getCell(`A${index + 2}`).value = value;
+  });
+
+  referentialSheet.getCell('B1').value = 'Départements';
+  departments.forEach((value, index) => {
+    referentialSheet.getCell(`B${index + 2}`).value = value;
+  });
+
+  referentialSheet.state = 'hidden';
+
+  // Colonnes du fichier modèle
+  worksheet.columns = [
+    { header: 'Nom complet', key: 'name', width: 28 },
+    { header: 'Email', key: 'email', width: 34 },
+    { header: 'CUID', key: 'cuid', width: 16 },
+    { header: 'Type de contrat', key: 'contract_type', width: 20 },
+    { header: 'Département', key: 'department', width: 20 }
+  ];
+
+  // Ligne d’exemple
+  worksheet.addRow({
+    name: 'Jean Dupont',
+    email: 'jean.dupont@sofrecom.com',
+    cuid: 'JDUP1234',
+    contract_type: 'CDI',
+    department: 'SUPPORT'
+  });
+
+  worksheet.views = [{ state: 'frozen', ySplit: 1 }];
+  worksheet.autoFilter = 'A1:E1';
+
+  // Style du header
+  const headerRow = worksheet.getRow(1);
+  headerRow.height = 24;
+
+  headerRow.eachCell((cell) => {
+    cell.font = {
+      bold: true,
+      color: { argb: 'FFFFFFFF' }
+    };
+    cell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF111827' }
+    };
+    cell.alignment = {
+      vertical: 'middle',
+      horizontal: 'center'
+    };
+    cell.border = {
+      top: { style: 'thin', color: { argb: 'FFD0D5DD' } },
+      left: { style: 'thin', color: { argb: 'FFD0D5DD' } },
+      bottom: { style: 'thin', color: { argb: 'FFD0D5DD' } },
+      right: { style: 'thin', color: { argb: 'FFD0D5DD' } }
+    };
+  });
+
+  // Style de la ligne exemple
+  const exampleRow = worksheet.getRow(2);
+  exampleRow.eachCell((cell) => {
+    cell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFF8FAFC' }
+    };
+    cell.border = {
+      top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+      left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+      bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+      right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+    };
+  });
+
+  // Notes dans le header
+  worksheet.getCell('A1').note = 'Obligatoire. Exemple : Jean Dupont';
+  worksheet.getCell('B1').note = 'Obligatoire. Doit être un email valide.';
+  worksheet.getCell('C1').note = 'Optionnel. Format attendu : 4 lettres MAJUSCULES + 4 chiffres. Exemple : JDUP1234';
+  worksheet.getCell('D1').note = 'Optionnel. Choisir une valeur dans la liste déroulante.';
+  worksheet.getCell('E1').note = 'Optionnel. Choisir une valeur dans la liste déroulante.';
+
+  const maxRows = 500;
+
+  for (let row = 2; row <= maxRows; row++) {
+    // Nom complet obligatoire
+    worksheet.getCell(`A${row}`).dataValidation = {
+      type: 'custom',
+      allowBlank: false,
+      formulae: [`LEN(TRIM(A${row}))>0`],
+      showErrorMessage: true,
+      errorStyle: 'stop',
+      errorTitle: 'Nom complet obligatoire',
+      error: 'Le nom complet est obligatoire.'
+    };
+
+    // Email obligatoire
+    worksheet.getCell(`B${row}`).dataValidation = {
+      type: 'custom',
+      allowBlank: false,
+      formulae: [
+        `AND(LEN(TRIM(B${row}))>0,ISNUMBER(SEARCH("@",B${row})),ISNUMBER(SEARCH(".",B${row})))`
+      ],
+      showErrorMessage: true,
+      errorStyle: 'stop',
+      errorTitle: 'Email invalide',
+      error: 'Veuillez saisir un email valide.'
+    };
+
+    // CUID optionnel mais validé s’il est rempli
+    worksheet.getCell(`C${row}`).dataValidation = {
+      type: 'custom',
+      allowBlank: true,
+      formulae: [
+        `OR(C${row}="",AND(LEN(C${row})=8,EXACT(LEFT(C${row},4),UPPER(LEFT(C${row},4))),ISNUMBER(VALUE(RIGHT(C${row},4)))))`
+      ],
+      showErrorMessage: true,
+      errorStyle: 'stop',
+      errorTitle: 'CUID invalide',
+      error: 'Le CUID doit contenir 4 lettres MAJUSCULES suivies de 4 chiffres. Exemple : JDUP1234.'
+    };
+
+    // Liste déroulante type de contrat
+    worksheet.getCell(`D${row}`).dataValidation = {
+      type: 'list',
+      allowBlank: true,
+      formulae: [`'Référentiels'!$A$2:$A$${contractTypes.length + 1}`],
+      showErrorMessage: true,
+      errorStyle: 'stop',
+      errorTitle: 'Type de contrat invalide',
+      error: `Choisir une valeur parmi : ${contractTypes.join(', ')}.`
+    };
+
+    // Liste déroulante département
+    worksheet.getCell(`E${row}`).dataValidation = {
+      type: 'list',
+      allowBlank: true,
+      formulae: [`'Référentiels'!$B$2:$B$${departments.length + 1}`],
+      showErrorMessage: true,
+      errorStyle: 'stop',
+      errorTitle: 'Département invalide',
+      error: `Choisir une valeur parmi : ${departments.join(', ')}.`
+    };
   }
+
+  const buffer = await workbook.xlsx.writeBuffer();
+
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  });
+
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'modele_employes.xlsx';
+  link.click();
+
+  window.URL.revokeObjectURL(url);
+}
 
   onFileSelected(event: any): void {
     const file = event.target.files[0];

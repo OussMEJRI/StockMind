@@ -11,7 +11,7 @@ export enum EquipmentStatus {
   IN_STOCK = 'in_stock',
   ASSIGNED = 'assigned',
   MAINTENANCE = 'maintenance',
-  RETIRED = 'retired'
+  STOLEN = 'stolen'
 }
 
 export enum EquipmentCondition {
@@ -57,7 +57,7 @@ export const EquipmentStatusLabels: Record<EquipmentStatus, string> = {
   [EquipmentStatus.IN_STOCK]: 'En stock',
   [EquipmentStatus.ASSIGNED]: 'Assigné',
   [EquipmentStatus.MAINTENANCE]: 'En maintenance',
-  [EquipmentStatus.RETIRED]: 'Retiré'
+  [EquipmentStatus.STOLEN]: 'Volé'
 };
 
 export const EquipmentConditionLabels: Record<EquipmentCondition, string> = {

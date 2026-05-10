@@ -22,6 +22,8 @@ class EquipmentCondition(str, enum.Enum):
 class EquipmentStatus(str, enum.Enum):
     IN_STOCK = "IN_STOCK"
     ASSIGNED = "ASSIGNED"
+    MAINTENANCE = "MAINTENANCE"
+    STOLEN = "STOLEN"
 
 
 class Equipment(Base):

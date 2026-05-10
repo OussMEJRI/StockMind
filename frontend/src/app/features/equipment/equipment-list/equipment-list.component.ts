@@ -60,7 +60,7 @@ import {
               <option value="in_stock">En stock</option>
               <option value="assigned">Assigné</option>
               <option value="maintenance">En maintenance</option>
-              <option value="retired">Retiré</option>
+              <option value="stolen">Volé</option>
             </select>
           </div>
 
@@ -296,7 +296,7 @@ import {
     .filter-row {
       display: flex;
       gap: 0.8rem;
-      align-items: end;
+      align-items: flex-end;
       flex-wrap: wrap;
     }
 
@@ -899,7 +899,7 @@ export class EquipmentListComponent implements OnInit {
       'in_stock': 'badge-success',
       'assigned': 'badge-info',
       'maintenance': 'badge-warning',
-      'retired': 'badge-danger'
+      'stolen': 'badge-danger'
     };
     return badges[status] || 'badge-secondary';
   }
