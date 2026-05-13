@@ -132,11 +132,18 @@ def update_equipment(
 
     has_assignment = bool(current_employee_id or current_emplacement_id)
 
-    # Volé uniquement si l'équipement est déjà affecté
+    # Volé uniquement si déjà affecté
     if requested_status == "STOLEN" and not has_assignment:
         raise HTTPException(
             status_code=400,
             detail="Un équipement ne peut être marqué Volé que s'il est déjà affecté"
+        )
+
+    # Assigné doit avoir une affectation
+    if requested_status == "ASSIGNED" and not has_assignment:
+        raise HTTPException(
+            status_code=400,
+            detail="Un équipement assigné doit avoir une affectation"
         )
 
     # Cohérence type / affectation
@@ -152,30 +159,41 @@ def update_equipment(
             detail="Les laptops doivent être assignés à un employé"
         )
 
-    # Si on modifie explicitement l'affectation
+    # Exclusivité affectation employé / emplacement
     if "employee_id" in payload and payload["employee_id"] is not None:
         payload["emplacement_id"] = None
-        if requested_status != "STOLEN":
-            payload["status"] = "ASSIGNED"
 
     if "emplacement_id" in payload and payload["emplacement_id"] is not None:
         payload["employee_id"] = None
-        if requested_status != "STOLEN":
-            payload["status"] = "ASSIGNED"
 
-    # Si on enlève explicitement l'affectation → retour en stock
-    if requested_status != "STOLEN":
-        if "employee_id" in payload and payload["employee_id"] is None and "emplacement_id" not in payload:
-            payload["status"] = "IN_STOCK"
+    # Si aucun statut fourni, on recalcule seulement par cohérence
+    if "status" not in payload:
+        payload["status"] = "ASSIGNED" if has_assignment else "IN_STOCK"
 
-        if "emplacement_id" in payload and payload["emplacement_id"] is None and "employee_id" not in payload:
-            payload["status"] = "IN_STOCK"
+    # IN_STOCK libère toujours l'affectation
+    elif requested_status == "IN_STOCK":
+        payload["employee_id"] = None
+        payload["emplacement_id"] = None
 
-        if (
-            "employee_id" in payload and payload.get("employee_id") is None and
-            "emplacement_id" in payload and payload.get("emplacement_id") is None
-        ):
-            payload["status"] = "IN_STOCK"
+    # ASSIGNED garde une affectation obligatoire
+    elif requested_status == "ASSIGNED":
+        if not has_assignment:
+            raise HTTPException(
+                status_code=400,
+                detail="Un équipement assigné doit avoir une affectation"
+            )
+
+    # MAINTENANCE : autorisé avec ou sans affectation
+    elif requested_status == "MAINTENANCE":
+        pass
+
+    # STOLEN : on garde l'affectation
+    elif requested_status == "STOLEN":
+        if not has_assignment:
+            raise HTTPException(
+                status_code=400,
+                detail="Un équipement ne peut être marqué Volé que s'il est déjà affecté"
+            )
 
     for key, value in payload.items():
         setattr(db_eq, key, value)
@@ -183,7 +201,6 @@ def update_equipment(
     db.commit()
     db.refresh(db_eq)
     return db_eq
-
 @router.delete("/{equipment_id}")
 def delete_equipment(
     equipment_id: int,

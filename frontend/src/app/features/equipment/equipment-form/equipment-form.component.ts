@@ -498,21 +498,27 @@ get availableStatuses(): EquipmentStatus[] {
     });
   }
 
-  onStatusChange(): void {
-    const status = this.form?.get('status')?.value;
+onStatusChange(): void {
+  const status = this.form?.get('status')?.value;
 
+  // Si on passe à ASSIGNED, on charge les données d'affectation
   if (status === EquipmentStatus.ASSIGNED) {
     this.loadAssignmentData();
     return;
   }
 
-  // Volé garde l'affectation existante
-  if (status === EquipmentStatus.STOLEN) {
+  // MAINTENANCE et STOLEN gardent l'affectation existante
+  if (
+    status === EquipmentStatus.MAINTENANCE ||
+    status === EquipmentStatus.STOLEN
+  ) {
     return;
   }
 
-  // Tous les autres statuts libèrent l'affectation
-  this.form.patchValue({ employee_id: null, emplacement_id: null });
+  // IN_STOCK libère l'affectation
+  if (status === EquipmentStatus.IN_STOCK) {
+    this.form.patchValue({ employee_id: null, emplacement_id: null });
+  }
 }
 
   onTypeChange(): void {
@@ -575,6 +581,11 @@ onSubmit(): void {
 
   // Cas ASSIGNED
   if (formValue.status === EquipmentStatus.ASSIGNED) {
+    if (!formValue.employee_id && !formValue.emplacement_id) {
+      this.error = "Un équipement assigné doit avoir une affectation";
+      return;
+    }
+
     if (this.isLaptop) {
       formValue.emplacement_id = null;
     } else {
@@ -602,8 +613,17 @@ onSubmit(): void {
     }
   }
 
-  // Cas IN_STOCK / MAINTENANCE
-  else {
+  // Cas MAINTENANCE : on garde l'affectation si elle existe
+  else if (formValue.status === EquipmentStatus.MAINTENANCE) {
+    if (this.isLaptop) {
+      formValue.emplacement_id = null;
+    } else {
+      formValue.employee_id = null;
+    }
+  }
+
+  // Cas IN_STOCK : on enlève l'affectation
+  else if (formValue.status === EquipmentStatus.IN_STOCK) {
     formValue.employee_id = null;
     formValue.emplacement_id = null;
   }
