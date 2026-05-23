@@ -5,7 +5,6 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
-// ✅ Angular Material
 import { MatTableModule }           from '@angular/material/table';
 import { MatPaginatorModule }       from '@angular/material/paginator';
 import { MatIconModule }            from '@angular/material/icon';
@@ -19,11 +18,9 @@ import { MatTooltipModule }         from '@angular/material/tooltip';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent }     from './app.component';
 
-// Interceptors
 import { AuthInterceptor }  from './core/interceptors/auth.interceptor';
 import { ErrorInterceptor } from './core/interceptors/error.interceptor';
 
-// Composants NON standalone
 import { LoginComponent }           from './features/auth/login/login.component';
 import { DashboardComponent }       from './features/dashboard/dashboard.component';
 import { EmplacementListComponent } from './features/emplacements/emplacement-list.component';
@@ -32,12 +29,12 @@ import { ChatbotComponent }         from './features/chatbot/chatbot.component';
 import { CarbonFootprintComponent } from './features/carbon-footprint/carbon-footprint.component';
 import { NavbarComponent }          from './shared/components/navbar/navbar.component';
 
-// Composants standalone
-import { EmployeeListComponent } from './features/employees/employee-list/employee-list.component';
-import { EmployeeFormComponent } from './features/employees/employee-form/employee-form.component';
-import { EquipmentListComponent } from './features/equipment/equipment-list/equipment-list.component';
-import { EquipmentFormComponent } from './features/equipment/equipment-form/equipment-form.component';
-import { UsersComponent }        from './features/users/users.component';
+import { EmployeeListComponent }     from './features/employees/employee-list/employee-list.component';
+import { EmployeeFormComponent }     from './features/employees/employee-form/employee-form.component';
+import { EquipmentListComponent }    from './features/equipment/equipment-list/equipment-list.component';
+import { EquipmentFormComponent }    from './features/equipment/equipment-form/equipment-form.component';
+import { UsersComponent }            from './features/users/users.component';
+import { InventoryHistoryComponent } from './features/history/inventory-history.component';
 
 @NgModule({
   declarations: [
@@ -58,7 +55,7 @@ import { UsersComponent }        from './features/users/users.component';
     FormsModule,
     ReactiveFormsModule,
     AppRoutingModule,
-    // Angular Material
+
     MatTableModule,
     MatPaginatorModule,
     MatIconModule,
@@ -68,12 +65,13 @@ import { UsersComponent }        from './features/users/users.component';
     MatSelectModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    // ✅ Composants standalone
+
     EmployeeListComponent,
     EmployeeFormComponent,
     EquipmentListComponent,
     EquipmentFormComponent,
     UsersComponent,
+    InventoryHistoryComponent,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

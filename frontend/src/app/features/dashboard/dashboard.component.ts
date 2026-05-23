@@ -122,7 +122,7 @@ Chart.register(...registerables);
         </div>
 
         <div class="kpi-card border-red">
-          <div class="kpi-label">🚫 RETIRÉS</div>
+          <div class="kpi-label">🚫 Volés</div>
           <div class="kpi-val">{{ retires }}</div>
         </div>
 
@@ -484,7 +484,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   };
   private statusLabels: Record<string,string> = {
     in_stock:'En stock', assigned:'Assigné',
-    maintenance:'En maintenance', stolen:'Retiré'
+    maintenance:'En maintenance', stolen:'Volé'
   };
   private statusColors: Record<string,string> = {
     in_stock:'#388bfd', assigned:'#39d353',

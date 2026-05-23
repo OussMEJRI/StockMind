@@ -4,6 +4,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AppNotification } from '../../../core/models/notification.model';
 import { ThemeService } from '../../../core/services/theme.service';
+
 @Component({
   selector: 'app-navbar',
   standalone: false,
@@ -77,6 +78,33 @@ import { ThemeService } from '../../../core/services/theme.service';
       align-items: center;
       gap: 0.8rem;
       margin-left: auto;
+    }
+
+    .nav-action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+
+    .history-btn {
+      background: rgba(188,140,255,0.12);
+      border-color: rgba(188,140,255,0.35);
+      color: #bc8cff;
+    }
+
+    .history-btn:hover,
+    .nav-action-btn.active-action {
+      background: rgba(188,140,255,0.22);
+      border-color: rgba(188,140,255,0.55);
+      color: #d2a8ff;
     }
 
     .role-badge {
@@ -242,7 +270,8 @@ import { ThemeService } from '../../../core/services/theme.service';
       cursor: pointer;
       font-size: 0.75rem;
     }
-          .theme-toggle {
+
+    .theme-toggle {
       background: rgba(188,140,255,0.12);
       border: 1px solid rgba(188,140,255,0.35);
       color: #bc8cff;
@@ -259,8 +288,16 @@ import { ThemeService } from '../../../core/services/theme.service';
       border-color: rgba(188,140,255,0.55);
     }
 
-    @media (max-width: 992px) {
+    @media (max-width: 1100px) {
       .navbar-menu {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .navbar-user .user-name,
+      .navbar-user .role-badge,
+      .navbar-user .history-btn {
         display: none;
       }
     }
@@ -297,13 +334,15 @@ export class NavbarComponent implements OnInit {
       error: (err) => console.error('Erreur notifications:', err)
     });
   }
+
   toggleTheme(): void {
-  this.themeService.toggleTheme();
-}
+    this.themeService.toggleTheme();
+  }
 
   get isDarkTheme(): boolean {
-  return this.themeService.isDarkTheme();
+    return this.themeService.isDarkTheme();
   }
+
   toggleNotifications(): void {
     this.showNotifications = !this.showNotifications;
 

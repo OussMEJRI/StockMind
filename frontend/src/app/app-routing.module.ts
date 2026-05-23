@@ -14,6 +14,7 @@ import { EmplacementFormComponent } from './features/emplacements/emplacement-fo
 import { ChatbotComponent }         from './features/chatbot/chatbot.component';
 import { CarbonFootprintComponent } from './features/carbon-footprint/carbon-footprint.component';
 import { UsersComponent }           from './features/users/users.component';
+import { InventoryHistoryComponent } from './features/history/inventory-history.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -37,8 +38,8 @@ const routes: Routes = [
       { path: 'locations/edit/:id',     component: EmplacementFormComponent },
       { path: 'chatbot',                component: ChatbotComponent },
       { path: 'carbon',                 component: CarbonFootprintComponent },
-      // ✅ Page utilisateurs — ADMIN uniquement
-      { path: 'users', component: UsersComponent, canActivate: [AdminGuard] },
+      { path: 'users',                  component: UsersComponent, canActivate: [AdminGuard] },
+      { path: 'history',                component: InventoryHistoryComponent },
     ]
   },
   { path: '**', redirectTo: '/dashboard' }

@@ -9,7 +9,8 @@ from app.api.v1.endpoints import (
     import_excel,
     employee_history,
     users,
-    notifications
+    notifications,
+    inventory_history,
 )
 
 api_router = APIRouter()
@@ -24,3 +25,4 @@ api_router.include_router(health.router, prefix="/health", tags=["health"])
 api_router.include_router(import_excel.router, prefix="/import", tags=["import"])
 api_router.include_router(employee_history.router, prefix="/employees", tags=["employee-history"])
 api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
+api_router.include_router(inventory_history.router, prefix="/history", tags=["inventory-history"])
