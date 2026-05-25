@@ -796,3 +796,6 @@ body.light-theme .overview-subtitle .count {
   border-radius: 8px;
   padding: 0.9rem 1rem;
 }
+.navbar-menu {
+  margin-left: -35px !important;
+}
