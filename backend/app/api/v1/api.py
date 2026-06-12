@@ -26,3 +26,4 @@ api_router.include_router(import_excel.router, prefix="/import", tags=["import"]
 api_router.include_router(employee_history.router, prefix="/employees", tags=["employee-history"])
 api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
 api_router.include_router(inventory_history.router, prefix="/history", tags=["inventory-history"])
+#api_router.include_router(import_equipement.router, prefix="/import", tags=["import"])
