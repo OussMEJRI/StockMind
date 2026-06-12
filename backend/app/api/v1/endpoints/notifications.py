@@ -3,6 +3,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List
 
+from app.models.movement import EquipmentMovement
+from app.models.employee_equipment_history import EmployeeEquipmentHistory
+
 from app.core.deps import get_db, get_current_active_user, require_roles
 from app.models.user import User, UserRole
 from app.models.equipment import Equipment
@@ -137,7 +140,23 @@ def approve_delete_request(
     notification.processed_by_user_id = admin_user.id
 
     if equipment:
-        db.delete(equipment)
+      requested_equipment_id = equipment.id
+
+      db.query(EmployeeEquipmentHistory).filter(
+          EmployeeEquipmentHistory.equipment_id == requested_equipment_id
+      ).delete(synchronize_session=False)
+
+      db.query(EquipmentMovement).filter(
+          EquipmentMovement.equipment_id == requested_equipment_id
+      ).delete(synchronize_session=False)
+
+      db.query(Notification).filter(
+          Notification.equipment_id == requested_equipment_id,
+          Notification.id != notification.id
+      ).update({Notification.equipment_id: None}, synchronize_session=False)
+
+    notification.equipment_id = None
+    db.delete(equipment)
 
     response = Notification(
         recipient_user_id=notification.sender_user_id,
